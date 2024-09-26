@@ -9,7 +9,7 @@ $pass = 'Nad*HggLka';
 try {
     $connection = new PDO("sqlsrv:server=$host,$port;Database=$db", $user, $pass);
     $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Conexão bem-sucedida!";
+   
 } catch (PDOException $e) {
     echo "Erro na conexão: " . $e->getMessage();
 }
