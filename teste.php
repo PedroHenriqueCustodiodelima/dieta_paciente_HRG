@@ -7,54 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        table {
-            width: 80%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 8px 10px;
-        }
-
-        thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #dddddd;
-        }
-
-        tbody tr:nth-of-type(even) {
-            background-color: #f3f3f3;
-        }
-
-        tbody tr:last-of-type {
-            border-bottom: 2px solid #4CAF50;
-        }
-
-        tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        td {
-            text-align: center;
-            font-size: 12px;
-        }
-
-        table th:first-child, 
-        table td:first-child {
-            text-align: left;
-        }
-
-        .table-container {
-            max-width: 80%;
-            overflow-x: auto;
-            margin: 0 auto;
-        }
+       
+      
+        
 
         .pagination-container {
             display: flex;
@@ -122,14 +77,16 @@
         if (count($result) > 0) {
 ?>
 
-            <div class="container mt-5 table-container">
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
                 <!-- Campo de filtro -->
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
                 
-                <table class="table table-striped table-bordered table-hover">
-                    <thead>
+                <table class="table table-striped table-bordered table-hover ">
+                    <thead style="background-color: green; color:white;">
                         <tr>
                             <th>IH</th>
                             <th>Registro</th>
@@ -142,7 +99,7 @@
                             <th>Horas</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
+                    <tbody id="table-body" >
                         <?php 
                         foreach ($result as $row) { 
                         ?>
@@ -172,6 +129,9 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
+            </div>
+            </div>
+            </div>
             </div>
 
 <?php 
