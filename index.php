@@ -12,15 +12,67 @@
 <body>
 
 <?php 
+    // Define o título da página
     $pageTitle = "Tabela de Pacientes";         
     include 'header.php'; 
-    ?>
+
+    // Executa a consulta SQL
+    $query = $connection->query("
+        SELECT 
+            HSP.HSP_NUM AS 'IH',
+            HSP.HSP_PAC AS 'REGISTRO',
+            PAC.PAC_NOME AS 'PACIENTE',
+            CNV.CNV_NOME AS 'CONVENIO',
+            RTRIM(STR.STR_NOME) AS 'UNIDADE',
+            LOC.LOC_NOME AS 'LEITO',
+            ISNULL(PSC.PSC_DHINI,'') AS 'PRESCRICAO',
+            ISNULL(ADP.ADP_NOME,'') AS 'DIETA',
+            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas'
+        FROM 
+            HSP 
+        INNER JOIN LOC ON HSP_LOC = LOC_COD 
+        INNER JOIN STR ON STR_COD = LOC_STR
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
+        WHERE 
+            HSP_TRAT_INT = 'I'
+            AND HSP_STAT = 'A'
+            AND PSC.PSC_STAT <> 'S'
+            AND PSC.PSC_DHINI = (
+                SELECT MAX(PSCMAX.PSC_DHINI) 
+                FROM PSC PSCMAX 
+                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+                    AND PSCMAX.PSC_HSP = PSC.PSC_HSP
+                    AND PSCMAX.PSC_TIP = 'D'
+                    AND PSCMAX.PSC_STAT = 'A'
+            )
+        GROUP BY 
+            HSP.HSP_NUM,
+            HSP.HSP_PAC,
+            PAC.PAC_NOME,
+            CNV.CNV_NOME,
+            STR.STR_NOME,
+            LOC.LOC_NOME,
+            PSC.PSC_ADP,
+            ADP.ADP_NOME,
+            ISNULL(PSC.PSC_DHINI, ''),
+            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE())
+        ORDER BY 
+            STR.STR_NOME,
+            LOC.LOC_NOME
+    ");
+
+    // Verifica se houve resultados
+    if ($query->num_rows > 0) {
+?>
+
     <div class="container mt-5">
-    
-        <table class="table table-striped table-bordered table-hover ">
+        <table class="table table-striped table-bordered table-hover">
             <thead style="background-color: green; color:white;">
                 <tr>
-                    <th >Data</th>
+                    <th>Data</th>
                     <th>Leito</th>
                     <th>Dieta</th>
                     <th>Unidade</th>
@@ -29,127 +81,19 @@
                 </tr>
             </thead>
             <tbody id="table-body">
+                <?php 
+                // Loop através dos resultados da consulta
+                while ($row = $query->fetch_assoc()) { 
+                ?>
                 <tr class="trdados">
-                    <td>24/09/2024</td>
-                    <td>102</td>
-                    <td>Normal</td>
-                    <td>13</td>
-
-                    <td>João da Silva</td>
-                    <td>12345</td>
+                    <td><?= date('d/m/Y', strtotime($row['PRESCRICAO'])); ?></td> <!-- Data da prescrição -->
+                    <td><?= htmlspecialchars($row['LEITO']); ?></td> <!-- Leito -->
+                    <td><?= htmlspecialchars($row['DIETA']); ?></td> <!-- Dieta -->
+                    <td><?= htmlspecialchars($row['UNIDADE']); ?></td> <!-- Unidade -->
+                    <td><?= htmlspecialchars($row['PACIENTE']); ?></td> <!-- Nome do paciente -->
+                    <td><?= htmlspecialchars($row['REGISTRO']); ?></td> <!-- Registro do paciente -->
                 </tr>
-                <tr class="trdados">
-                    <td>24/09/2024</td>
-                    <td>103</td>
-                    <td>Sem lactose</td>
-                    <td>1</td>
-                    <td>Maria Oliveira</td>
-                    <td>67890</td>
-                </tr>
-                <tr class="trdados">
-                    <td>25/09/2024</td>
-                    <td>104</td>
-                    <td>Vegetariana</td>
-                    <td>15</td>
-                    <td>Pedro Souza</td>
-                    <td>54321</td>
-                </tr>
-                <tr class="trdados">
-                    <td>25/09/2024</td>
-                    <td>105</td>
-                    <td>Hipossódica</td>
-                    <td>13</td>
-                    <td>Ana Pereira</td>
-                    <td>98765</td>
-                </tr>
-                <tr class="trdados">
-                    <td>26/09/2024</td>
-                    <td>106</td>
-                    <td>Sem glúten</td>
-                    <td>3</td>
-                    <td>Carlos Costa</td>
-                    <td>11223</td>
-                </tr>
-                <tr class="trdados">
-                    <td>26/09/2024</td>
-                    <td>107</td>
-                    <td>Normal</td>
-                    <td>17</td>
-                    <td>Beatriz Lima</td>
-                    <td>33445</td>
-                </tr>
-                <tr class="trdados" >
-                    <td>27/09/2024</td>
-                    <td>108</td>
-                    <td>Vegetariana</td>
-                    <td>8</td>
-                    <td>Felipe Santos</td>
-                    <td>55667</td>
-                </tr>
-                <tr class="trdados">
-                    <td>27/09/2024</td>
-                    <td>109</td>
-                    <td>Sem lactose</td>
-                    <td>11</td>
-                    <td>Luana Matos</td>
-                    <td>77889</td>
-                </tr>
-                <tr class="trdados">
-                    <td>28/09/2024</td>
-                    <td>110</td>
-                    <td>Normal</td>
-                    <td>9</td>
-                    <td>Gabriel Souza</td>
-                    <td>99001</td>
-                </tr>
-                <tr class="trdados">
-                    <td>28/09/2024</td>
-                    <td>111</td>
-                    <td>Hipossódica</td>
-                    <td>13</td>
-                    <td>Aline Rocha</td>
-                    <td>11324</td>
-                </tr>
-                <tr class="trdados">
-                    <td>29/09/2024</td>
-                    <td>112</td>
-                    <td>Sem glúten</td>
-                    <td>1</td>
-                    <td>Renato Barbosa</td>
-                    <td>22345</td>
-                </tr>
-                <tr class="trdados">
-                    <td>29/09/2024</td>
-                    <td>113</td>
-                    <td>Normal</td>
-                    <td>13</td>
-                    <td>Mariana Ferraz</td>
-                    <td>33456</td>
-                </tr>
-                <tr class="trdados">
-                    <td>30/09/2024</td>
-                    <td>114</td>
-                    <td>Sem lactose</td>
-                    <td>12</td>
-                    <td>Ricardo Silva</td>
-                    <td>44567</td>
-                </tr>
-                <tr class="trdados">
-                    <td>30/09/2024</td>
-                    <td>115</td>
-                    <td>Vegetariana</td>
-                    <td>10</td>
-                    <td>Sara Martins</td>
-                    <td>55678</td>
-                </tr>
-                <tr class="trdados">
-                    <td>01/10/2024</td>
-                    <td>116</td>
-                    <td>Normal</td>
-                    <td>13</td>
-                    <td>Paulo Dias</td>
-                    <td>66789</td>
-                </tr>
+                <?php } ?>
             </tbody>
         </table>
 
@@ -166,6 +110,14 @@
             </ul>
         </nav>
     </div>
+
+<?php 
+    } else {
+        echo "<p>Nenhum paciente encontrado.</p>";
+    }
+
+    include 'footer.php'; 
+?>
 
     <!-- Link do Bootstrap JS e Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
