@@ -1,10 +1,64 @@
+<style>
+    table {
+    width: 80%; /* Reduz a largura da tabela */
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px; /* Diminui o tamanho da fonte */
+    text-align: left;
+    }
+
+    th, td {
+        padding: 8px 10px; /* Reduz o espaçamento interno das células */
+    }
+
+    thead {
+        background-color: #4CAF50; /* Cor verde para o cabeçalho */
+        color: white; /* Texto branco */
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3; /* Cor de fundo diferente para linhas pares */
+    }
+
+    tbody tr:last-of-type {
+        border-bottom: 2px solid #4CAF50; /* Adiciona uma borda mais grossa no final */
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1; /* Cor de fundo ao passar o mouse */
+    }
+
+    td {
+        text-align: center; /* Centraliza o conteúdo das células */
+        font-size: 12px; /* Diminui ainda mais o tamanho da fonte nas células */
+    }
+
+    table th:first-child, 
+    table td:first-child {
+        text-align: left; /* Primeira coluna alinhada à esquerda */
+    }
+
+    .table-container {
+        max-width: 80%; /* Ajusta o tamanho máximo para responsividade */
+        overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+        margin: 0 auto; /* Centraliza a tabela horizontalmente */
+    }
+
+</style>
+
 <?php
 // index.php
 
 include 'conexao.php'; // Inclui o arquivo de conexão
 
+
+
 try {
-    // Sua consulta SQL
+    // Consulta SQL
     $query = $connection->query("
         SELECT 
             HSP.HSP_NUM            AS 'IH',
@@ -56,8 +110,10 @@ try {
 
     // Verifica se existem resultados
     if (count($result) > 0) {
-        echo "<table border='1'>"; // Começa a tabela
-        echo "<tr>
+        echo '<div class="table-container">';
+        echo '<table border="1">'; // Começa a tabela
+        echo '<thead>';
+        echo '<tr>
                 <th>IH</th>
                 <th>REGISTRO</th>
                 <th>PACIENTE</th>
@@ -67,24 +123,26 @@ try {
                 <th>PRESCRICAO</th>
                 <th>DIETA</th>
                 <th>HORAS</th>
-              </tr>";
-
+              </tr>';
+        echo '</thead>';
+        echo '<tbody>';
         // Exibe os dados em linhas da tabela
         foreach ($result as $row) {
-            echo "<tr>
-                    <td>{$row['IH']}</td>
-                    <td>{$row['REGISTRO']}</td>
-                    <td>{$row['PACIENTE']}</td>
-                    <td>{$row['CONVENIO']}</td>
-                    <td>{$row['UNIDADE']}</td>
-                    <td>{$row['LEITO']}</td>
-                    <td>{$row['PRESCRICAO']}</td>
-                    <td>{$row['DIETA']}</td>
-                    <td>{$row['horas']}</td>
-                  </tr>";
+            echo '<tr>
+                    <td>' . htmlspecialchars($row['IH']) . '</td>
+                    <td>' . htmlspecialchars($row['REGISTRO']) . '</td>
+                    <td>' . htmlspecialchars($row['PACIENTE']) . '</td>
+                    <td>' . htmlspecialchars($row['CONVENIO']) . '</td>
+                    <td>' . htmlspecialchars($row['UNIDADE']) . '</td>
+                    <td>' . htmlspecialchars($row['LEITO']) . '</td>
+                    <td>' . htmlspecialchars($row['PRESCRICAO']) . '</td>
+                    <td>' . htmlspecialchars($row['DIETA']) . '</td>
+                    <td>' . htmlspecialchars($row['horas']) . '</td>
+                  </tr>';
         }
-
-        echo "</table>"; // Finaliza a tabela
+        echo '</tbody>';
+        echo '</table>'; // Finaliza a tabela
+        echo '</div>';
     } else {
         echo "Nenhum resultado encontrado."; // Mensagem se não houver resultados
     }
