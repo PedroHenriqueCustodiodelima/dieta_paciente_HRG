@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabela de Pacientes com Paginação Dinâmica</title>
-    <!-- Link do Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         table {
-            width: 80%; /* Reduz a largura da tabela */
+            width: 80%;
             border-collapse: collapse;
             margin: 20px 0;
-            font-size: 14px; /* Diminui o tamanho da fonte */
+            font-size: 14px;
             text-align: left;
         }
 
         th, td {
-            padding: 8px 10px; /* Reduz o espaçamento interno das células */
+            padding: 8px 10px;
         }
 
         thead {
-            background-color: #4CAF50; /* Cor verde para o cabeçalho */
-            color: white; /* Texto branco */
+            background-color: #4CAF50;
+            color: white;
         }
 
         tbody tr {
@@ -30,31 +31,37 @@
         }
 
         tbody tr:nth-of-type(even) {
-            background-color: #f3f3f3; /* Cor de fundo diferente para linhas pares */
+            background-color: #f3f3f3;
         }
 
         tbody tr:last-of-type {
-            border-bottom: 2px solid #4CAF50; /* Adiciona uma borda mais grossa no final */
+            border-bottom: 2px solid #4CAF50;
         }
 
         tbody tr:hover {
-            background-color: #f1f1f1; /* Cor de fundo ao passar o mouse */
+            background-color: #f1f1f1;
         }
 
         td {
-            text-align: center; /* Centraliza o conteúdo das células */
-            font-size: 12px; /* Diminui ainda mais o tamanho da fonte nas células */
+            text-align: center;
+            font-size: 12px;
         }
 
         table th:first-child, 
         table td:first-child {
-            text-align: left; /* Primeira coluna alinhada à esquerda */
+            text-align: left;
         }
 
         .table-container {
-            max-width: 80%; /* Ajusta o tamanho máximo para responsividade */
-            overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
-            margin: 0 auto; /* Centraliza a tabela horizontalmente */
+            max-width: 80%;
+            overflow-x: auto;
+            margin: 0 auto;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -62,7 +69,7 @@
 
 <?php 
     include 'conexao.php'; // Inclui o arquivo de conexão
- include 'header.php';
+
     // Executa a consulta SQL
     try {
         $query = $connection->query("
@@ -112,8 +119,7 @@
                 LOC.LOC_NOME
         ");
 
-        // Verifica se houve resultados
-        $result = $query->fetchAll(PDO::FETCH_ASSOC); // Obtém todos os resultados como um array associativo
+        $result = $query->fetchAll(PDO::FETCH_ASSOC); 
 
         if (count($result) > 0) {
 ?>
@@ -135,36 +141,31 @@
                     </thead>
                     <tbody id="table-body">
                         <?php 
-                        // Loop através dos resultados da consulta
                         foreach ($result as $row) { 
                         ?>
                         <tr class="trdados">
-                            <td><?= htmlspecialchars($row['IH']); ?></td> <!-- IH -->
-                            <td><?= htmlspecialchars($row['REGISTRO']); ?></td> <!-- Registro -->
-                            <td><?= htmlspecialchars($row['PACIENTE']); ?></td> <!-- Nome do paciente -->
-                            <td><?= htmlspecialchars($row['CONVENIO']); ?></td> <!-- Convênio -->
-                            <td><?= htmlspecialchars($row['UNIDADE']); ?></td> <!-- Unidade -->
-                            <td><?= htmlspecialchars($row['LEITO']); ?></td> <!-- Leito -->
-                            <td><?= date('d/m/Y', strtotime($row['PRESCRICAO'])); ?></td> <!-- Data da prescrição -->
-                            <td><?= htmlspecialchars($row['DIETA']); ?></td> <!-- Dieta -->
-                            <td><?= htmlspecialchars($row['horas']); ?></td> <!-- Horas -->
+                            <td><?= htmlspecialchars($row['IH']); ?></td>
+                            <td><?= htmlspecialchars($row['REGISTRO']); ?></td>
+                            <td><?= htmlspecialchars($row['PACIENTE']); ?></td>
+                            <td><?= htmlspecialchars($row['CONVENIO']); ?></td>
+                            <td><?= htmlspecialchars($row['UNIDADE']); ?></td>
+                            <td><?= htmlspecialchars($row['LEITO']); ?></td>
+                            <td><?= date('d/m/Y', strtotime($row['PRESCRICAO'])); ?></td>
+                            <td><?= htmlspecialchars($row['DIETA']); ?></td>
+                            <td><?= htmlspecialchars($row['horas']); ?></td>
                         </tr>
                         <?php } ?>
                     </tbody>
                 </table>
 
                 <!-- Paginação -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center" id="pagination">
-                        <li class="page-item" id="prev-page">
-                            <a class="page-link" href="#" tabindex="-1">Anterior</a>
-                        </li>
-                        <!-- Os números das páginas serão gerados dinamicamente -->
-                        <li class="page-item" id="next-page">
-                            <a class="page-link" href="#">Próximo</a>
-                        </li>
-                    </ul>
-                </nav>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-svYgWYqQj+6kTeG7FHTBQ9ivY0BJPQL5p9o/USLbm1U0E5D6H4Ll7Kn/CrRrA5gRY7WrD6wT9auFea0pNsmM7Zw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+                <div class="pagination-container" id="pagination-container">
+        <button class="btn btn-primary" id="prev-set" disabled><i class="fa-solid fa-arrow-left"></i></button>
+        <div id="page-numbers" class="mx-2"></div>
+        <button class="btn btn-primary" id="next-set"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
             </div>
 
 <?php 
@@ -176,86 +177,82 @@
     }
 ?>
 
-    <!-- Link do Bootstrap JS e Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const rowsPerPage = 15;
+        const rowsPerPage = 15; // Número de linhas por página
+        const pagesPerSet = 10; // Número de páginas por conjunto
         let currentPage = 1;
+        let currentSet = 1; // Conjunto atual de páginas
         const tableRows = document.querySelectorAll('#table-body tr');
         const totalPages = Math.ceil(tableRows.length / rowsPerPage);
-        const paginationContainer = document.getElementById('pagination');
-        const prevPageBtn = document.getElementById('prev-page');
-        const nextPageBtn = document.getElementById('next-page');
+        const paginationContainer = document.getElementById('pagination-container');
+        const prevSetBtn = document.getElementById('prev-set');
+        const nextSetBtn = document.getElementById('next-set');
+        const pageNumbersContainer = document.getElementById('page-numbers');
 
-        // Função para gerar os números de página na paginação
-        function generatePaginationNumbers() {
-            for (let i = 1; i <= totalPages; i++) {
-                const pageItem = document.createElement('li');
-                pageItem.classList.add('page-item');
-                if (i === currentPage) pageItem.classList.add('active');
-                
-                const pageLink = document.createElement('a');
-                pageLink.classList.add('page-link');
-                pageLink.href = "#";
-                pageLink.textContent = i;
-
-                pageLink.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    currentPage = i;
-                    showPage(currentPage);
-                    updatePaginationButtons();
-                });
-
-                pageItem.appendChild(pageLink);
-                nextPageBtn.before(pageItem);
-            }
-        }
-
+        // Mostra as linhas da tabela para a página atual
         function showPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = page * rowsPerPage;
+
             tableRows.forEach((row, index) => {
-                row.style.display = 'none'; // Esconde todas as linhas
-                if (index >= (page - 1) * rowsPerPage && index < page * rowsPerPage) {
-                    row.style.display = ''; // Mostra as linhas da página atual
-                }
-            });
-
-            // Atualiza a classe 'active' nos números da paginação
-            document.querySelectorAll('.pagination .page-item').forEach((item, index) => {
-                if (index === page) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
+                row.style.display = 'none';
+                if (index >= start && index < end) {
+                    row.style.display = '';
                 }
             });
         }
 
-        function updatePaginationButtons() {
-            prevPageBtn.classList.toggle('disabled', currentPage === 1);
-            nextPageBtn.classList.toggle('disabled', currentPage === totalPages);
+        // Atualiza os números das páginas exibidas
+        function updatePageNumbers() {
+            pageNumbersContainer.innerHTML = '';
+            const totalVisiblePages = Math.min(pagesPerSet, totalPages - ((currentSet - 1) * pagesPerSet));
+            const startPage = (currentSet - 1) * pagesPerSet + 1;
+
+            for (let i = 0; i < totalVisiblePages; i++) {
+                const pageNumber = startPage + i;
+                if (pageNumber <= totalPages) {
+                    const pageButton = document.createElement('button');
+                    pageButton.innerText = pageNumber;
+                    pageButton.classList.add('btn', 'btn-light', 'mx-1');
+                    pageButton.onclick = () => {
+                        currentPage = pageNumber;
+                        showPage(currentPage);
+                    };
+                    pageNumbersContainer.appendChild(pageButton);
+                }
+            }
         }
 
-        prevPageBtn.addEventListener('click', function(event) {
-            event.preventDefault();
-            if (currentPage > 1) {
-                currentPage--;
-                showPage(currentPage);
-                updatePaginationButtons();
+        // Atualiza os botões de navegação
+        function updateNavigationButtons() {
+            prevSetBtn.disabled = currentSet === 1;
+            nextSetBtn.disabled = currentSet * pagesPerSet >= totalPages;
+        }
+
+        // Navegação para o conjunto anterior e próximo de páginas
+        prevSetBtn.addEventListener('click', () => {
+            if (currentSet > 1) {
+                currentSet--;
+                updatePageNumbers();
+                updateNavigationButtons();
+                showPage(1); // Reseta para a primeira página do novo conjunto
             }
         });
 
-        nextPageBtn.addEventListener('click', function(event) {
-            event.preventDefault();
-            if (currentPage < totalPages) {
-                currentPage++;
-                showPage(currentPage);
-                updatePaginationButtons();
+        nextSetBtn.addEventListener('click', () => {
+            if (currentSet * pagesPerSet < totalPages) {
+                currentSet++;
+                updatePageNumbers();
+                updateNavigationButtons();
+                showPage(1); // Reseta para a primeira página do novo conjunto
             }
         });
 
-        // Inicia a paginação e exibe a primeira página
-        generatePaginationNumbers();
+        // Inicializa a tabela
         showPage(currentPage);
-        updatePaginationButtons();
+        updatePageNumbers();
+        updateNavigationButtons();
     </script>
 </body>
 </html>
