@@ -14,7 +14,7 @@
             <div class="row py-1">
                 <div class="titulo">
                 <p class="fw-bold text-light fs-2" style="box-shadow: none; margin: 0 auto;"> 
-                    <?php echo isset($pageTitle) ? $pageTitle : ""; ?>
+                    <?php echo isset($pageTitle) ? $pageTitle : "Dieta Pacientes Internados"; ?>
                 </p>
             </div>
             

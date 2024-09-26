@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabela de Pacientes com Paginação Dinâmica</title>
@@ -22,7 +20,7 @@
         }
 
         thead {
-            background-color: #4CAF50;
+            background-color: green;
             color: white;
         }
 
@@ -69,55 +67,10 @@
 
 <?php 
     include 'conexao.php'; // Inclui o arquivo de conexão
-
+    include 'header.php';
     // Executa a consulta SQL
     try {
-        $query = $connection->query("
-            SELECT 
-                HSP.HSP_NUM AS 'IH',
-                HSP.HSP_PAC AS 'REGISTRO',
-                PAC.PAC_NOME AS 'PACIENTE',
-                CNV.CNV_NOME AS 'CONVENIO',
-                RTRIM(STR.STR_NOME) AS 'UNIDADE',
-                LOC.LOC_NOME AS 'LEITO',
-                ISNULL(PSC.PSC_DHINI,'') AS 'PRESCRICAO',
-                ISNULL(ADP.ADP_NOME,'') AS 'DIETA',
-                DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas'
-            FROM 
-                HSP 
-            INNER JOIN LOC ON HSP_LOC = LOC_COD 
-            INNER JOIN STR ON STR_COD = LOC_STR
-            INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
-            INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
-            LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
-            LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
-            WHERE 
-                HSP_TRAT_INT = 'I'
-                AND HSP_STAT = 'A'
-                AND PSC.PSC_STAT <> 'S'
-                AND PSC.PSC_DHINI = (
-                    SELECT MAX(PSCMAX.PSC_DHINI) 
-                    FROM PSC PSCMAX 
-                    WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-                        AND PSCMAX.PSC_HSP = PSC.PSC_HSP
-                        AND PSCMAX.PSC_TIP = 'D'
-                        AND PSCMAX.PSC_STAT = 'A'
-                )
-            GROUP BY 
-                HSP.HSP_NUM,
-                HSP.HSP_PAC,
-                PAC.PAC_NOME,
-                CNV.CNV_NOME,
-                STR.STR_NOME,
-                LOC.LOC_NOME,
-                PSC.PSC_ADP,
-                ADP.ADP_NOME,
-                ISNULL(PSC.PSC_DHINI, ''), 
-                DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE())
-            ORDER BY 
-                STR.STR_NOME,
-                LOC.LOC_NOME
-        ");
+        $query = $connection->query("SELECT HSP.HSP_NUM AS 'IH', HSP.HSP_PAC AS 'REGISTRO', PAC.PAC_NOME AS 'PACIENTE', CNV.CNV_NOME AS 'CONVENIO', RTRIM(STR.STR_NOME) AS 'UNIDADE', LOC.LOC_NOME AS 'LEITO', ISNULL(PSC.PSC_DHINI,'') AS 'PRESCRICAO', ISNULL(ADP.ADP_NOME,'') AS 'DIETA', DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas' FROM HSP INNER JOIN LOC ON HSP_LOC = LOC_COD INNER JOIN STR ON STR_COD = LOC_STR INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' WHERE HSP_TRAT_INT = 'I' AND HSP_STAT = 'A' AND PSC.PSC_STAT <> 'S' AND PSC.PSC_DHINI = (SELECT MAX(PSCMAX.PSC_DHINI) FROM PSC PSCMAX WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC AND PSCMAX.PSC_HSP = PSC.PSC_HSP AND PSCMAX.PSC_TIP = 'D' AND PSCMAX.PSC_STAT = 'A') GROUP BY HSP.HSP_NUM, HSP.HSP_PAC, PAC.PAC_NOME, CNV.CNV_NOME, STR.STR_NOME, LOC.LOC_NOME, PSC.PSC_ADP, ADP.ADP_NOME, ISNULL(PSC.PSC_DHINI, ''), DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) ORDER BY STR.STR_NOME, LOC.LOC_NOME");
 
         $result = $query->fetchAll(PDO::FETCH_ASSOC); 
 
@@ -125,6 +78,9 @@
 ?>
 
             <div class="container mt-5 table-container">
+                <div class="mb-3">
+                    <input type="text" id="search-input" class="form-control" placeholder="Buscar por qualquer campo...">
+                </div>
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
@@ -157,15 +113,16 @@
                         <?php } ?>
                     </tbody>
                 </table>
-
-                <!-- Paginação -->
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-svYgWYqQj+6kTeG7FHTBQ9ivY0BJPQL5p9o/USLbm1U0E5D6H4Ll7Kn/CrRrA5gRY7WrD6wT9auFea0pNsmM7Zw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                 <div class="pagination-container" id="pagination-container">
-        <button class="btn btn-primary" id="prev-set" disabled><i class="fa-solid fa-arrow-left"></i></button>
-        <div id="page-numbers" class="mx-2"></div>
-        <button class="btn btn-primary" id="next-set"><i class="fa-solid fa-arrow-right"></i></button>
-    </div>
+    <button class="btn btn-success" id="prev-set" disabled>
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <div id="page-numbers" class="mx-2"></div>
+    <button class="btn btn-success" id="next-set">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+</div>
             </div>
 
 <?php 
@@ -190,69 +147,83 @@
         const nextSetBtn = document.getElementById('next-set');
         const pageNumbersContainer = document.getElementById('page-numbers');
 
-        // Mostra as linhas da tabela para a página atual
+        // Filtra a tabela com base no texto do input
+        const searchInput = document.getElementById('search-input');
+
+        searchInput.addEventListener('keyup', () => {
+            const filter = searchInput.value.toLowerCase();
+            tableRows.forEach(row => {
+                const rowData = Array.from(row.children)
+                    .map(cell => cell.textContent.toLowerCase())
+                    .join(' ');
+                row.style.display = rowData.includes(filter) ? '' : 'none';
+            });
+
+            // Atualiza a paginação após o filtro
+            currentPage = 1; // Reseta para a primeira página após o filtro
+            showPage(currentPage);
+        });
+
+        // Mostra as páginas com base na página atual
         function showPage(page) {
-            const start = (page - 1) * rowsPerPage;
-            const end = page * rowsPerPage;
+            const startIndex = (page - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
 
             tableRows.forEach((row, index) => {
-                row.style.display = 'none';
-                if (index >= start && index < end) {
-                    row.style.display = '';
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = row.style.display === 'none' ? 'none' : ''; // Exibe linhas com base na exibição
+                } else {
+                    row.style.display = 'none'; // Oculta outras linhas
                 }
             });
+
+            // Atualiza a numeração das páginas
+            updatePageNumbers();
         }
 
-        // Atualiza os números das páginas exibidas
+        // Atualiza os números das páginas na interface
         function updatePageNumbers() {
             pageNumbersContainer.innerHTML = '';
-            const totalVisiblePages = Math.min(pagesPerSet, totalPages - ((currentSet - 1) * pagesPerSet));
+            const totalPageSets = Math.ceil(totalPages / pagesPerSet);
             const startPage = (currentSet - 1) * pagesPerSet + 1;
+            const endPage = Math.min(startPage + pagesPerSet - 1, totalPages);
 
-            for (let i = 0; i < totalVisiblePages; i++) {
-                const pageNumber = startPage + i;
-                if (pageNumber <= totalPages) {
-                    const pageButton = document.createElement('button');
-                    pageButton.innerText = pageNumber;
-                    pageButton.classList.add('btn', 'btn-light', 'mx-1');
-                    pageButton.onclick = () => {
-                        currentPage = pageNumber;
-                        showPage(currentPage);
-                    };
-                    pageNumbersContainer.appendChild(pageButton);
-                }
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'btn btn-secondary mx-1';
+                pageBtn.innerText = i;
+                pageBtn.disabled = (i === currentPage);
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    showPage(currentPage);
+                });
+                pageNumbersContainer.appendChild(pageBtn);
             }
-        }
 
-        // Atualiza os botões de navegação
-        function updateNavigationButtons() {
+            // Ativa ou desativa os botões de navegação
             prevSetBtn.disabled = currentSet === 1;
-            nextSetBtn.disabled = currentSet * pagesPerSet >= totalPages;
+            nextSetBtn.disabled = currentSet === totalPageSets;
         }
 
-        // Navegação para o conjunto anterior e próximo de páginas
+        // Navega para o conjunto anterior de páginas
         prevSetBtn.addEventListener('click', () => {
             if (currentSet > 1) {
                 currentSet--;
-                updatePageNumbers();
-                updateNavigationButtons();
-                showPage(1); // Reseta para a primeira página do novo conjunto
+                showPage(currentPage);
             }
         });
 
+        // Navega para o próximo conjunto de páginas
         nextSetBtn.addEventListener('click', () => {
-            if (currentSet * pagesPerSet < totalPages) {
+            const totalPageSets = Math.ceil(totalPages / pagesPerSet);
+            if (currentSet < totalPageSets) {
                 currentSet++;
-                updatePageNumbers();
-                updateNavigationButtons();
-                showPage(1); // Reseta para a primeira página do novo conjunto
+                showPage(currentPage);
             }
         });
 
-        // Inicializa a tabela
+        // Mostra a primeira página ao carregar
         showPage(currentPage);
-        updatePageNumbers();
-        updateNavigationButtons();
     </script>
 </body>
 </html>
