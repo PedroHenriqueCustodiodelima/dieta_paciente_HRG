@@ -73,7 +73,7 @@
         overflow-x: auto; 
     }
     .table th, .table td {
-        font-size: 0.9em; 
+        font-size: 12px; 
     }
     .mb-3 .form-control {
         margin-bottom: 1em; 
@@ -84,6 +84,7 @@
         width: 40px; 
         height: 40px; 
     }
+    
 }
 #keyboard-navigation-message {
     display: none; 

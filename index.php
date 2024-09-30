@@ -91,7 +91,7 @@
                             <tr class="trdados">
                                 <td><?= htmlspecialchars($row['IH']); ?></td>
                                 <td><?= htmlspecialchars($row['REGISTRO']); ?></td>
-                                <td><?= htmlspecialchars($row['PACIENTE']); ?></td>
+                                <td class="pacientes"><?= htmlspecialchars($row['PACIENTE']); ?></td>
                                 <td><?= htmlspecialchars($row['CONVENIO']); ?></td>
                                 <td><?= htmlspecialchars($row['UNIDADE']); ?></td>
                                 <td><?= htmlspecialchars($row['LEITO']); ?></td>
