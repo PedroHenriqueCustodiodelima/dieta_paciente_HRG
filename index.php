@@ -11,9 +11,8 @@
 <body>
 
 <?php 
-    include 'conexao.php'; // Inclui o arquivo de conexão
+    include 'conexao.php'; 
     include 'header.php';
-    // Executa a consulta SQL
     try {
         $query = $connection->query("
             SELECT 
@@ -59,15 +58,18 @@
         $result = $query->fetchAll(PDO::FETCH_ASSOC); 
         if (count($result) > 0) {
 ?>
+<div id="keyboard-navigation-message" style="display: none;">
+    Navegação disponível: Use as setas esquerda e direita para navegar pelas páginas.
+</div>
+
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
-                <!-- Campo de filtro -->
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
                 
-                <div class="table-responsive"> <!-- Adicionado para responsividade -->
+                <div class="table-responsive"> 
                     <table class="table table-striped table-bordered table-hover">
                         <thead style="background-color: green; color:white;">
                             <tr>
@@ -100,9 +102,7 @@
                             <?php } ?>
                         </tbody>
                     </table>
-                </div> <!-- Fim do div responsivo -->
-
-                <!-- Paginação -->
+                </div> 
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                 <div class="pagination-container" id="pagination-container">
                     <button class="btn btn-success" id="prev-set" disabled>
@@ -119,8 +119,6 @@
     <button id="scrollToTop" class="btn btn-primary" style="display: none; position: fixed; bottom: 20px; right: 20px;">
         <i class="fa-solid fa-caret-up"></i>
     </button>
-
-
 <?php 
         } else {
             echo "<p>Nenhum paciente encontrado.</p>";
@@ -129,8 +127,7 @@
         echo "Erro ao executar a consulta: " . $e->getMessage();
     }
 ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="index.js"></script>
 </body>
 </html>
