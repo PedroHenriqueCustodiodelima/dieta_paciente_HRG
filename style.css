@@ -1,12 +1,21 @@
-.content-header  {
-
-    background-color:#001f3f;  
-    border-top: 5px solid green;
-    padding: 20px;
-    align-items: center;
-    color: aliceblue;
-
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; /* Alinha verticalmente os itens */
+    justify-content: space-between; /* Espaça os itens entre a logo e o texto */
 }
+
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; /* Faz o título ocupar o espaço disponível */
+    text-align: center; /* Centraliza o texto */
+    margin: 0; /* Remove margens padrão */
+}
+
+
 .pagination .page-item .page-link {
     background-color: green; /* Azul escuro para o fundo do botão */
     color: white; /* Cor do texto para branco */
@@ -21,6 +30,16 @@
     border: none !important; /* Remove a borda padrão */
     opacity: 1; /* Remove a opacidade padrão dos botões */
 
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
 
