@@ -11,9 +11,16 @@
 <body>
 
 <?php 
-    include 'conexao.php'; 
+    include 'conexao.php'; // Inclui o arquivo de conexão
     include 'header.php';
+
+    // Função para capitalizar a primeira letra de cada palavra
+    function capitalizeFirstLetters($string) {
+        return ucwords(strtolower($string));
+    }
+
     try {
+        // Consulta SQL para buscar os dados dos pacientes
         $query = $connection->query("
             SELECT 
                 HSP.HSP_NUM AS 'IH',
@@ -27,18 +34,15 @@
                 DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas'
             FROM 
                 HSP 
-            INNER JOIN 
-                LOC ON HSP_LOC = LOC_COD 
-            INNER JOIN 
-                STR ON STR_COD = LOC_STR
-            INNER JOIN 
-                PAC ON PAC.PAC_REG = HSP.HSP_PAC
-            INNER JOIN 
-                CNV ON CNV_COD = HSP.HSP_CNV
-            LEFT JOIN 
-                PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
-            LEFT JOIN 
-                ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
+            INNER JOIN LOC ON HSP_LOC = LOC_COD 
+            INNER JOIN STR ON STR_COD = LOC_STR
+            INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+            INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+            LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM 
+                AND PSC.PSC_PAC = HSP.HSP_PAC 
+                AND PSC.PSC_TIP = 'D'
+            LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP 
+                AND ADP_TIPO = 'D'
             WHERE 
                 HSP_TRAT_INT = 'I'
                 AND HSP_STAT = 'A'
@@ -51,13 +55,35 @@
                     AND PSCMAX.PSC_TIP = 'D'
                     AND PSCMAX.PSC_STAT = 'A'
                 )
-            ORDER BY 
-                STR.STR_NOME,
-                LOC.LOC_NOME;
+            ORDER BY PAC.PAC_NOME, STR.STR_NOME, LOC.LOC_NOME;
         ");
+
         $result = $query->fetchAll(PDO::FETCH_ASSOC); 
+
         if (count($result) > 0) {
+            // Agrupando os dados por nome do paciente
+            $groupedPatients = [];
+            foreach ($result as $row) {
+                $patientName = capitalizeFirstLetters($row['PACIENTE']);
+                if (!isset($groupedPatients[$patientName])) {
+                    $groupedPatients[$patientName] = [
+                        'IH' => $row['IH'],
+                        'REGISTRO' => $row['REGISTRO'],
+                        'PACIENTE' => $patientName,
+                        'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
+                        'UNIDADE' => capitalizeFirstLetters($row['UNIDADE']),
+                        'LEITO' => capitalizeFirstLetters($row['LEITO']),
+                        'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
+                        'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
+                        'horas' => $row['horas']
+                    ];
+                } else {
+                    // Adiciona a dieta à lista de dietas
+                    $groupedPatients[$patientName]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+                }
+            }
 ?>
+
 <div id="keyboard-navigation-message" style="display: none;">
     Navegação disponível: Use as setas esquerda e direita para navegar pelas páginas.
 </div>
