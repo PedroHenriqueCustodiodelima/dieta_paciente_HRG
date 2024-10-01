@@ -11,46 +11,50 @@
 <body>
 
 <?php 
-    include 'conexao.php'; 
-    include 'header.php';
-    function capitalizeFirstLetters($string) {
-        return ucwords(strtolower($string));
-    }
-    try {
-        $query = $connection->query("
-            SELECT 
-                HSP.HSP_NUM AS 'IH', 
-                HSP.HSP_PAC AS 'REGISTRO', 
-                PAC.PAC_NOME AS 'PACIENTE', 
-                CNV.CNV_NOME AS 'CONVENIO', 
-                LOC.LOC_NOME AS 'LEITO', 
-                PSC.PSC_DHINI AS 'PRESCRICAO', 
-                ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-                DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas',
-                HSP.HSP_DTHRE AS 'ADMISSÃO' -- Adicionando a coluna de admissão
-            FROM 
-                HSP 
-            INNER JOIN LOC ON HSP_LOC = LOC_COD 
-            INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
-            INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
-            LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
-            LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
-            WHERE 
-                HSP_TRAT_INT = 'I' 
-                AND HSP_STAT = 'A' 
-                AND PSC.PSC_STAT <> 'S' 
-                AND PSC.PSC_DHINI = (
-                    SELECT MAX(PSCMAX.PSC_DHINI) 
-                    FROM PSC PSCMAX 
-                    WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-                    AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
-                    AND PSCMAX.PSC_TIP = 'D' 
-                    AND PSCMAX.PSC_STAT = 'A'
-                )
-            ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
-        ");
-        $result = $query->fetchAll(PDO::FETCH_ASSOC); 
-        if (count($result) > 0) {
+include 'conexao.php'; 
+include 'header.php';
+
+function capitalizeFirstLetters($string) {
+    return ucwords(strtolower($string));
+}
+
+try {
+    $query = $connection->query("
+        SELECT 
+            HSP.HSP_NUM AS 'IH', 
+            HSP.HSP_PAC AS 'REGISTRO', 
+            PAC.PAC_NOME AS 'PACIENTE', 
+            CNV.CNV_NOME AS 'CONVENIO', 
+            LOC.LOC_NOME AS 'LEITO', 
+            PSC.PSC_DHINI AS 'PRESCRICAO', 
+            ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
+            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas',
+            HSP.HSP_DTHRE AS 'ADMISSÃO', -- Adicionando a coluna de admissão
+            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE' -- Cálculo da idade
+        FROM 
+            HSP 
+        INNER JOIN LOC ON HSP_LOC = LOC_COD 
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
+        WHERE 
+            HSP_TRAT_INT = 'I' 
+            AND HSP_STAT = 'A' 
+            AND PSC.PSC_STAT <> 'S' 
+            AND PSC.PSC_DHINI = (
+                SELECT MAX(PSCMAX.PSC_DHINI) 
+                FROM PSC PSCMAX 
+                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+                AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
+                AND PSCMAX.PSC_TIP = 'D' 
+                AND PSCMAX.PSC_STAT = 'A'
+            )
+        ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
+    ");
+    
+    $result = $query->fetchAll(PDO::FETCH_ASSOC); 
+    if (count($result) > 0) {
         $groupedPatients = [];
         foreach ($result as $row) {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
@@ -63,14 +67,13 @@
                     'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
                     'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
                     'horas' => $row['horas'],
-                    'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])) 
+                    'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
+                    'IDADE' => $row['IDADE'] // Adicionando a idade
                 ];
             } else {
                 $groupedPatients[$patientName]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
             }
-
-
-            }
+        }
 ?>
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
@@ -78,47 +81,45 @@
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
-                <table class="table table-striped table-bordered table-hover ">
-                    <thead style="background-color: green; color:white;">
-                        <tr>
-                            <th>Registro</th>
-                            <th>Paciente</th>
-                            <th>Acompanhante</th>
-                            <th>Convênio</th>
-                            <th>Leito</th>
-                            <th id="prescricao-header" style="min-width: 150px;">
-                                Prescrição 
-                                <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
-                            </th>
-                            <th>Dieta</th>
-                            <th>Admissão</th> 
-                            <th>Idade</th> 
-                            <th id="horas-header" style="cursor: pointer; min-width: 150px;">
-                                Horas 
-                                <i id="sort-horas-icon" class="fa-solid fa-caret-up"></i>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <?php 
-                        foreach ($groupedPatients as $patient) { 
-                        ?>
-                        <tr class="trdados">
-                            <td class="text-start align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-                            <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                            <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                            <td class="text-start align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                            <td class="text-start align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-                            <td class="text-start align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td> <!-- Adicionando Admissão -->
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td> <!-- Adicionando Admissão -->
+                <table class="table table-striped table-bordered table-hover">
+                <thead style="background-color: green; color:white;">
+                    <tr>
+                        <th>Registro</th>
+                        <th>Paciente</th>
+                        <th>Convênio</th>
+                        <th>Leito</th>
+                        <th id="prescricao-header" style="min-width: 150px;">
+                            Prescrição 
+                            <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
+                        </th>
+                        <th>Dieta</th>
+                        <th>Admissão</th>
+                        <th>Idade</th> <!-- Nova coluna de Idade -->
+                        <th id="horas-header" style="cursor: pointer; min-width: 150px;">
+                            Horas 
+                            <i id="sort-horas-icon" class="fa-solid fa-caret-up"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <?php 
+                    foreach ($groupedPatients as $patient) { 
+                    ?>
+                    <tr class="trdados">
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+                        <td class="text-center align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td> <!-- Exibindo a Idade -->
+                        <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
 
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td>
-                        </tr>
-                        <?php } ?>
-                    </tbody>
-                </table>
 
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                 <div class="pagination-container" id="pagination-container">
