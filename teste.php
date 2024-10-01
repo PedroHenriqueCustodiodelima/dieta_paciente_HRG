@@ -103,7 +103,7 @@ try {
             </th>
             <th>Dieta</th>
             <th id="admissao-header" style="min-width: 150px;">
-                Admissão
+                Data
                 <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i>
             </th>
             <th id="idade-header" style="cursor: pointer; min-width: 150px;">
@@ -119,16 +119,16 @@ try {
                 foreach ($groupedPatients as $patient) { 
                 ?>
                 <tr class="trdados">
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-                    <td class="text-start align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td>
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
-                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
+                    <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
+                    <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
                 </tr>
                 <?php 
                 } 
