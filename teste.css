@@ -81,6 +81,15 @@ table th, table td {
 
 
 #prescricao-header {
-    min-width: 150px; /* Ajuste a largura mínima conforme necessário */
-    white-space: nowrap; /* Garante que o texto e o ícone fiquem na mesma linha */
+    min-width: 150px; 
+    white-space: nowrap; 
+}
+.rotate-up {
+    transition: transform 0.3s;
+    transform: rotate(180deg);
+}
+
+.rotate-down {
+    transition: transform 0.3s;
+    transform: rotate(0deg);
 }

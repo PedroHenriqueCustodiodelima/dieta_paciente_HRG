@@ -28,9 +28,9 @@ try {
             LOC.LOC_NOME AS 'LEITO', 
             PSC.PSC_DHINI AS 'PRESCRICAO', 
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS 'horas',
             HSP.HSP_DTHRE AS 'ADMISSÃO', -- Adicionando a coluna de admissão
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE' -- Cálculo da idade
+            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', -- Cálculo da idade
+            HSP.HSP_DTHRA AS 'HSP_DTHRA' -- Adicionando a coluna de alta
         FROM 
             HSP 
         INNER JOIN LOC ON HSP_LOC = LOC_COD 
@@ -51,8 +51,7 @@ try {
                 AND PSCMAX.PSC_STAT = 'A'
             )
         ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
-    ");
-    
+    ");  
     $result = $query->fetchAll(PDO::FETCH_ASSOC); 
     if (count($result) > 0) {
         $groupedPatients = [];
@@ -66,14 +65,14 @@ try {
                     'LEITO' => capitalizeFirstLetters($row['LEITO']),
                     'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
                     'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
-                    'horas' => $row['horas'],
                     'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                    'IDADE' => $row['IDADE'] // Adicionando a idade
+                    'IDADE' => $row['IDADE'],
+                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO' // Verifica se há alta
                 ];
             } else {
                 $groupedPatients[$patientName]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
             }
-        }
+        }        
 ?>
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
@@ -81,46 +80,61 @@ try {
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
+                <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
+                    <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
+                </div>
+
                 <table class="table table-striped table-bordered table-hover">
-                <thead style="background-color: green; color:white;">
-                    <tr>
-                        <th>Registro</th>
-                        <th>Paciente</th>
-                        <th>Convênio</th>
-                        <th>Leito</th>
-                        <th id="prescricao-header" style="min-width: 150px;">
-                            Prescrição 
-                            <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
-                        </th>
-                        <th>Dieta</th>
-                        <th>Admissão</th>
-                        <th>Idade</th> <!-- Nova coluna de Idade -->
-                        <th id="horas-header" style="cursor: pointer; min-width: 150px;">
-                            Horas 
-                            <i id="sort-horas-icon" class="fa-solid fa-caret-up"></i>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <?php 
-                    foreach ($groupedPatients as $patient) { 
-                    ?>
-                    <tr class="trdados">
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-                        <td class="text-center align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td> <!-- Exibindo a Idade -->
-                        <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td>
-                    </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-
-
+    <thead style="background-color: green; color:white;">
+        <tr>
+            <th>Registro</th>
+            <th id="paciente-header" style="cursor: pointer;">
+                Paciente
+                <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i>
+            </th>
+            <th id="convenio-header" style="cursor: pointer;">
+                Convênio
+                <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i>
+            </th>
+            <th>Leito</th>
+            <th id="prescricao-header" style="min-width: 150px;">
+                Prescrição 
+                <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
+            </th>
+            <th>Dieta</th>
+            <th id="admissao-header" style="min-width: 150px;">
+                Admissão
+                <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i>
+            </th>
+            <th id="idade-header" style="cursor: pointer; min-width: 150px;">
+                Idade
+                <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i>
+            </th>
+            <th id="alta-header" style="min-width: 150px;">ALTA</th> 
+            <th>Acompanhante</th>
+        </tr>
+    </thead>
+            <tbody id="table-body">
+                <?php 
+                foreach ($groupedPatients as $patient) { 
+                ?>
+                <tr class="trdados">
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+                    <td class="text-start align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
+                    <td class="text-start align-middle"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
+                </tr>
+                <?php 
+                } 
+                ?>
+            </tbody>
+        </table>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                 <div class="pagination-container" id="pagination-container">
                     <button class="btn btn-success" id="prev-set" disabled>
