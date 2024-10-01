@@ -21,26 +21,34 @@ const rowsPerPage = 20;
         const totalSets = Math.ceil(totalPages / pagesPerSet);
         const startSet = (currentSet - 1) * pagesPerSet + 1;
         const endSet = Math.min(startSet + pagesPerSet - 1, totalPages);
-
+    
         pageNumbersContainer.innerHTML = '';
-
+    
         for (let i = startSet; i <= endSet; i++) {
             const pageNumber = document.createElement('button');
             pageNumber.className = 'btn btn-success mx-1';
             pageNumber.textContent = i;
+            
+            // Adicione a classe 'active-page' à página atual
+            if (i === currentPage) {
+                pageNumber.classList.add('active-page');
+            }
+    
             pageNumber.onclick = () => {
                 currentPage = i;
                 showPage(currentPage, filteredRows);
-                updatePagination(filteredRows);
+                updatePagination(filteredRows); // Reatualizar a paginação após a mudança de página
             };
+    
             pageNumbersContainer.appendChild(pageNumber);
         }
-
+    
         prevSetBtn.disabled = currentSet === 1;
         nextSetBtn.disabled = currentSet === totalSets;
-
+    
         showPage(currentPage, filteredRows);
     }
+    
 function filterTable() {
     const filterValue = document.getElementById('filterInput').value.toLowerCase();
     filteredRows = tableRows.filter(row => {

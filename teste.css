@@ -17,6 +17,12 @@ table {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+.active-page {
+    background-color: #fdfdfd; /* ou outra cor */
+    color: green;
+    font-weight: bold;
+}
+
 table th, table td {
     padding: 10px;
     text-align: center;
@@ -48,7 +54,7 @@ table th, table td {
 }
 
 .pagination .page-item .page-link {
-    background-color: green; 
+    background-color: rgb(10, 10, 10); 
     color: white; 
     border: none !important; 
     opacity: 1; 

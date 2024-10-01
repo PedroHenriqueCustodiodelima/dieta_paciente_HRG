@@ -83,6 +83,7 @@
                         <tr>
                             <th>Registro</th>
                             <th>Paciente</th>
+                            <th>Acompanhante</th>
                             <th>Convênio</th>
                             <th>Leito</th>
                             <th id="prescricao-header" style="min-width: 150px;">
@@ -91,6 +92,7 @@
                             </th>
                             <th>Dieta</th>
                             <th>Admissão</th> 
+                            <th>Idade</th> 
                             <th id="horas-header" style="cursor: pointer; min-width: 150px;">
                                 Horas 
                                 <i id="sort-horas-icon" class="fa-solid fa-caret-up"></i>
@@ -102,13 +104,16 @@
                         foreach ($groupedPatients as $patient) { 
                         ?>
                         <tr class="trdados">
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                            <td class="text-center align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
+                            <td class="text-start align-middle"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                            <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                            <td class="text-start align-middle"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                            <td class="text-start align-middle"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                            <td class="text-start align-middle"><?= htmlspecialchars($patient['LEITO']); ?></td>
                             <td class="text-center align-middle"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-                            <td class="text-center align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                            <td class="text-start align-middle col-3"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
                             <td class="text-center align-middle"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td> <!-- Adicionando Admissão -->
+                            <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td> <!-- Adicionando Admissão -->
+
                             <td class="text-center align-middle"><?= htmlspecialchars($patient['horas']); ?></td>
                         </tr>
                         <?php } ?>
