@@ -10,6 +10,7 @@
 </head>
 <body>
 
+
 <?php 
 include 'conexao.php'; 
 include 'header.php';
@@ -19,7 +20,8 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $query = $connection->query("
+
+    $query = "
         SELECT 
             HSP.HSP_NUM AS 'IH', 
             HSP.HSP_PAC AS 'REGISTRO', 
@@ -28,9 +30,9 @@ try {
             LOC.LOC_NOME AS 'LEITO', 
             PSC.PSC_DHINI AS 'PRESCRICAO', 
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            HSP.HSP_DTHRE AS 'ADMISSÃO', -- Adicionando a coluna de admissão
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', -- Cálculo da idade
-            HSP.HSP_DTHRA AS 'HSP_DTHRA' -- Adicionando a coluna de alta
+            HSP.HSP_DTHRE AS 'ADMISSÃO', 
+            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', 
+            HSP.HSP_DTHRA AS 'HSP_DTHRA' 
         FROM 
             HSP 
         INNER JOIN LOC ON HSP_LOC = LOC_COD 
@@ -42,24 +44,34 @@ try {
             HSP_TRAT_INT = 'I' 
             AND HSP_STAT = 'A' 
             AND PSC.PSC_STAT <> 'S' 
-            AND PSC.PSC_DHINI = (
-                SELECT MAX(PSCMAX.PSC_DHINI) 
-                FROM PSC PSCMAX 
-                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-                AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
-                AND PSCMAX.PSC_TIP = 'D' 
-                AND PSCMAX.PSC_STAT = 'A'
-            )
-        ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
-    ");  
-    $result = $query->fetchAll(PDO::FETCH_ASSOC); 
+    ";
+
+    if (isset($_POST['filterLast6Hours'])) {
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
+    }
+
+
+    $query .= " AND PSC.PSC_DHINI = (
+        SELECT MAX(PSCMAX.PSC_DHINI) 
+        FROM PSC PSCMAX 
+        WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+        AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
+        AND PSCMAX.PSC_TIP = 'D' 
+        AND PSCMAX.PSC_STAT = 'A'
+    ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
+
+    
+    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+
     if (count($result) > 0) {
         $groupedPatients = [];
         foreach ($result as $row) {
+            $registro = $row['REGISTRO'];
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
-            if (!isset($groupedPatients[$patientName])) {
-                $groupedPatients[$patientName] = [
-                    'REGISTRO' => $row['REGISTRO'],
+            
+            if (!isset($groupedPatients[$registro])) {
+                $groupedPatients[$registro] = [
+                    'REGISTRO' => $registro,
                     'PACIENTE' => $patientName,
                     'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
                     'LEITO' => capitalizeFirstLetters($row['LEITO']),
@@ -67,22 +79,44 @@ try {
                     'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
                     'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
                     'IDADE' => $row['IDADE'],
-                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO' // Verifica se há alta
+                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
                 ];
             } else {
-                $groupedPatients[$patientName]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+                if (!empty($row['DIETA'])) {
+                    $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+                }
             }
-        }        
+        }
+
+        foreach ($groupedPatients as $registro => &$patient) {
+            $patient['DIETAS'] = array_unique($patient['DIETAS']);
+        }
+
+    }
+
+} catch (Exception $e) {
+    echo "Erro: " . $e->getMessage();
+}
 ?>
+
+
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
+
+        <form method="POST" action="">
+                <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
+                <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
+            </form>
+
+        
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
                 <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
                     <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
                 </div>
+
 
                 <table class="table table-striped table-bordered table-hover">
     <thead style="background-color: green; color:white;">
@@ -125,6 +159,8 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+
+
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
                     <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
                     <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
@@ -149,14 +185,7 @@ try {
         </div>
     </div>
 </div>
-<?php 
-        } else {
-            echo "<p>Nenhum paciente encontrado.</p>";
-        }
-    } catch (Exception $e) {
-        echo "Erro ao executar a consulta: " . $e->getMessage();
-    }
-?>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="teste.js"></script>
 </body>

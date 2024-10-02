@@ -20,7 +20,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    // Inicializando a consulta base
+
     $query = "
         SELECT 
             HSP.HSP_NUM AS 'IH', 
@@ -46,12 +46,11 @@ try {
             AND PSC.PSC_STAT <> 'S' 
     ";
 
-    // Verificando se o botão de filtrar foi pressionado
     if (isset($_POST['filterLast6Hours'])) {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
     }
 
-    // Mantendo a condição para filtrar o último registro da dieta
+
     $query .= " AND PSC.PSC_DHINI = (
         SELECT MAX(PSCMAX.PSC_DHINI) 
         FROM PSC PSCMAX 
@@ -61,7 +60,7 @@ try {
         AND PSCMAX.PSC_STAT = 'A'
     ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
 
-    // Executando a consulta
+    
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($result) > 0) {
@@ -93,7 +92,6 @@ try {
             $patient['DIETAS'] = array_unique($patient['DIETAS']);
         }
 
-        // Aqui você pode adicionar o código para exibir os dados agrupados na sua tabela
     }
 
 } catch (Exception $e) {
