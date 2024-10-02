@@ -41,10 +41,10 @@ function updatePagination(rows) {
 
         pageNumber.onclick = () => {
             currentPage = i;
-            clearInterval(autoPageInterval); // Limpa o intervalo ao clicar
-            clearInterval(progressInterval); // Limpa a barra de progresso ao clicar
+            clearInterval(autoPageInterval); 
+            clearInterval(progressInterval); 
             updateTableAndPagination(filteredRows);
-            updateProgressBar(); // Reinicia a barra de progresso
+            updateProgressBar(); 
         };
 
         pageNumbersContainer.appendChild(pageNumber);
@@ -56,55 +56,58 @@ function updatePagination(rows) {
     showPage(currentPage, filteredRows);
 }
 
-// Função para avançar para a próxima página
+
+
 function nextPage() {
-    currentPage++;
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    
+    currentPage++;
+
     if (currentPage > totalPages) {
-        currentPage = 1; // Volta para a primeira página
+        currentPage = 1; 
     }
+
     updateTableAndPagination(filteredRows);
-    updateProgressBar(); // Atualiza a barra de progresso
+    updateProgressBar(); 
 }
 
-// Inicia a paginação automática
 function startAutoPagination() {
-    updateProgressBar(); // Inicia a barra de progresso
-    autoPageInterval = setInterval(nextPage, intervalTime);
+    updateProgressBar(); 
+    autoPageInterval = setInterval(nextPage, intervalTime); 
 }
 
-// Atualiza a barra de progresso
+
+startAutoPagination(); 
+
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = '0%'; // Reseta a largura da barra
-    let width = 0; // Inicializa a largura da barra
-    const increment = 100 / (intervalTime / 100); // Incremento da barra
+    progressBar.style.width = '0%'; 
+    let startTime = null; 
+    const duration = intervalTime; 
 
-    clearInterval(progressInterval); // Limpa qualquer intervalo anterior
-    progressInterval = setInterval(() => {
-        if (width >= 100) {
-            clearInterval(progressInterval); // Para quando a barra está cheia
-        } else {
-            width++;
-            progressBar.style.width = width + '%'; // Atualiza a largura da barra
+    function animateProgress(timestamp) {
+        if (!startTime) startTime = timestamp; 
+        const elapsed = timestamp - startTime; 
+        const progress = Math.min((elapsed / duration) * 100, 100); 
+
+        progressBar.style.width = progress + '%'; 
+
+        if (progress < 100) {
+            requestAnimationFrame(animateProgress); 
         }
-    }, 100); // Atualiza a barra a cada 100ms
+    }
+
+    requestAnimationFrame(animateProgress); 
 }
 
-// Parar a paginação automática (opcional, caso queira adicionar um botão)
 function stopAutoPagination() {
     clearInterval(autoPageInterval);
     clearInterval(progressInterval);
 }
 
-// Mostrar a primeira página inicialmente
+
 showPage(currentPage, filteredRows);
-startAutoPagination(); // Inicia a paginação automática
-
-
-
-
-
+startAutoPagination(); 
 
 
 
