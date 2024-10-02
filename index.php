@@ -20,8 +20,8 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    // Consulta para buscar dados do paciente, incluindo a dieta
-    $query = $connection->query("
+    // Inicializando a consulta base
+    $query = "
         SELECT 
             HSP.HSP_NUM AS 'IH', 
             HSP.HSP_PAC AS 'REGISTRO', 
@@ -30,9 +30,9 @@ try {
             LOC.LOC_NOME AS 'LEITO', 
             PSC.PSC_DHINI AS 'PRESCRICAO', 
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            HSP.HSP_DTHRE AS 'ADMISSÃO', -- Adicionando a coluna de admissão
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', -- Cálculo da idade
-            HSP.HSP_DTHRA AS 'HSP_DTHRA' -- Adicionando a coluna de alta
+            HSP.HSP_DTHRE AS 'ADMISSÃO', 
+            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', 
+            HSP.HSP_DTHRA AS 'HSP_DTHRA' 
         FROM 
             HSP 
         INNER JOIN LOC ON HSP_LOC = LOC_COD 
@@ -44,18 +44,25 @@ try {
             HSP_TRAT_INT = 'I' 
             AND HSP_STAT = 'A' 
             AND PSC.PSC_STAT <> 'S' 
-            AND PSC.PSC_DHINI = (
-                SELECT MAX(PSCMAX.PSC_DHINI) 
-                FROM PSC PSCMAX 
-                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-                AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
-                AND PSCMAX.PSC_TIP = 'D' 
-                AND PSCMAX.PSC_STAT = 'A'
-            )
-        ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
-    ");  
-    
-    $result = $query->fetchAll(PDO::FETCH_ASSOC); 
+    ";
+
+    // Verificando se o botão de filtrar foi pressionado
+    if (isset($_POST['filterLast6Hours'])) {
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
+    }
+
+    // Mantendo a condição para filtrar o último registro da dieta
+    $query .= " AND PSC.PSC_DHINI = (
+        SELECT MAX(PSCMAX.PSC_DHINI) 
+        FROM PSC PSCMAX 
+        WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+        AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
+        AND PSCMAX.PSC_TIP = 'D' 
+        AND PSCMAX.PSC_STAT = 'A'
+    ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
+
+    // Executando a consulta
+    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($result) > 0) {
         $groupedPatients = [];
@@ -63,7 +70,6 @@ try {
             $registro = $row['REGISTRO'];
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             
-            // Agrupando os dados do paciente
             if (!isset($groupedPatients[$registro])) {
                 $groupedPatients[$registro] = [
                     'REGISTRO' => $registro,
@@ -77,14 +83,12 @@ try {
                     'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
                 ];
             } else {
-                // Adicionando dietas ao paciente, evitando duplicatas
                 if (!empty($row['DIETA'])) {
                     $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
                 }
             }
         }
 
-        // Remover duplicatas nas dietas
         foreach ($groupedPatients as $registro => &$patient) {
             $patient['DIETAS'] = array_unique($patient['DIETAS']);
         }
@@ -103,10 +107,9 @@ try {
         <div class="col-12">
 
         <form method="POST" action="">
-    <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-    <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
-
-</form>
+                <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
+                <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
+            </form>
 
         
                 <div class="mb-3">
