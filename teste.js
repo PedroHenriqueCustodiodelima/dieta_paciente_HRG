@@ -16,10 +16,15 @@ let progressInterval;
 
 function showPage(page, rows) {
     const start = (page - 1) * rowsPerPage;
-    const end = page * rowsPerPage;
-    tableBody.innerHTML = '';
-    const rowsToDisplay = rows.slice(start, end);
-    rowsToDisplay.forEach(row => tableBody.appendChild(row));
+    const end = start + rowsPerPage; 
+
+    tableBody.innerHTML = ''; 
+    const rowsToDisplay = rows.slice(start, end); 
+    if (rowsToDisplay.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="X">Nenhum dado para exibir</td></tr>'; 
+    } else {
+        rowsToDisplay.forEach(row => tableBody.appendChild(row));
+    }
 }
 
 function updatePagination(rows) {
@@ -56,16 +61,21 @@ function updatePagination(rows) {
     showPage(currentPage, filteredRows);
 }
 
-
+function updateTableAndPagination(rows) {
+    showPage(currentPage, rows); 
+    updatePagination(rows); 
+}
 
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    
+    console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
     currentPage++;
-
     if (currentPage > totalPages) {
         currentPage = 1; 
     }
+    
+    console.log(`Página atual após: ${currentPage}`);
+
 
     updateTableAndPagination(filteredRows);
     updateProgressBar(); 
@@ -75,9 +85,6 @@ function startAutoPagination() {
     updateProgressBar(); 
     autoPageInterval = setInterval(nextPage, intervalTime); 
 }
-
-
-startAutoPagination(); 
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
@@ -104,15 +111,8 @@ function stopAutoPagination() {
     clearInterval(autoPageInterval);
     clearInterval(progressInterval);
 }
-
-
 showPage(currentPage, filteredRows);
 startAutoPagination(); 
-
-
-
-
-
 
 
 
