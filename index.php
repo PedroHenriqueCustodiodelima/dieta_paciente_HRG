@@ -100,22 +100,24 @@ try {
 ?>
 
 
+
+     
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
+            
+        <div class="text-end mb-3">
+    <form method="POST" action="">
+        <button type="submit" class="btn btn-primary me-2" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
+        <button type="submit" class="btn btn-secondary" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
+    </form>
+</div>
 
-        <form method="POST" action="">
-                <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-                <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
-            </form>
-
-        
+   
                 <div class="mb-3">
                     <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
                 </div>
-                <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
-                    <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
-                </div>
+                
 
 
                 <table class="table table-striped table-bordered table-hover">
@@ -171,6 +173,12 @@ try {
                 ?>
             </tbody>
         </table>
+
+        
+        <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
+                    <div id="progress-bar" style="width: 0%; height: 10px; background-color: #001f3f"></div>
+                </div>
+
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                 <div class="pagination-container" id="pagination-container">
                     <button class="btn btn-success" id="prev-set" disabled>
