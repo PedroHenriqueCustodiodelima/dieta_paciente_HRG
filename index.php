@@ -103,19 +103,81 @@ try {
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
-
         <form method="POST" action="">
-                <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-                <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
-            </form>
+    <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours" accesskey="f">Filtrar Últimas 6 Horas</button>
+    <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData" accesskey="a">Mostrar Todos os Dados</button>
+</form>
 
-        
-                <div class="mb-3">
-                    <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
-                </div>
-                <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
-                    <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
-                </div>
+<div class="mb-3">
+    <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
+</div>
+
+<div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
+    <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
+</div>
+
+<script>
+    document.addEventListener('keydown', function(event) {
+        // Impede ações se o foco estiver no campo de filtro
+        if (document.activeElement === document.getElementById('filterInput')) {
+            // Se a tecla Esc for pressionada, remove o foco do campo de filtro
+            if (event.key === 'j' || event.key === 'J') {
+                document.getElementById('filterInput').blur(); // Remove o foco do campo de filtro
+            }
+            return; // Não faz nada se o campo de filtro está ativo
+        }
+
+        // Ação para o botão "Filtrar Últimas 6 Horas"
+        if (event.key === 'f' || event.key === 'F') {
+            document.getElementById('filterLast6Hours').click();
+        }
+
+        // Ação para o botão "Mostrar Todos os Dados"
+        if (event.key === 'a' || event.key === 'A') {
+            document.getElementById('showAllData').click();
+        }
+
+        // Ação para a tecla "Enter"
+        if (event.key === 'Enter') {
+            if (document.activeElement === document.getElementById('filterLast6Hours')) {
+                document.getElementById('filterLast6Hours').click();
+            } else if (document.activeElement === document.getElementById('showAllData')) {
+                document.getElementById('showAllData').click();
+            }
+        }
+
+        // Ação para a tecla "R"
+        if (event.key === 'r' || event.key === 'R') {
+            document.getElementById('filterInput').focus(); // Foca no campo de filtro
+        }
+    });
+
+    function filterTable() {
+        const input = document.getElementById('filterInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('yourTableId'); // Substitua 'yourTableId' pelo ID da sua tabela
+        const tr = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < tr.length; i++) {
+            const td = tr[i].getElementsByTagName('td');
+            let rowContainsFilterText = false;
+
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    const cellValue = td[j].textContent || td[j].innerText;
+                    if (cellValue.toLowerCase().indexOf(filter) > -1) {
+                        rowContainsFilterText = true;
+                    }
+                }
+            }
+
+            // Mostra ou esconde a linha com base na filtragem
+            tr[i].style.display = rowContainsFilterText ? '' : 'none';
+        }
+    }
+</script>
+
+
 
 
                 <table class="table table-striped table-bordered table-hover">

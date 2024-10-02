@@ -220,13 +220,13 @@ admissaoHeader.onclick = function() {
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isConvenioAsc = false; // Para controlar a ordenação da coluna de Convênio
+let isConvenioAsc = false; 
 
-// Evento de clique no cabeçalho de Convênio para ordenar
+
 document.getElementById('convenio-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const convenioA = a.cells[2].textContent.trim().toLowerCase(); // Índice 2, ajuste se necessário
-        const convenioB = b.cells[2].textContent.trim().toLowerCase(); // Índice 2, ajuste se necessário
+        const convenioA = a.cells[2].textContent.trim().toLowerCase(); 
+        const convenioB = b.cells[2].textContent.trim().toLowerCase(); 
 
         if (convenioA < convenioB) return isConvenioAsc ? -1 : 1;
         if (convenioA > convenioB) return isConvenioAsc ? 1 : -1;
@@ -235,21 +235,20 @@ document.getElementById('convenio-header').onclick = function() {
 
     isConvenioAsc = !isConvenioAsc; 
 
-    // Atualização do ícone
+ 
     const sortConvenioIcon = document.getElementById('sort-convenio-icon');
     sortConvenioIcon.className = isConvenioAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortConvenioIcon.style.display = 'inline';
 
-    currentPage = 1; // Reseta para a primeira página
+    currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isIdadeAsc = false; // Para controlar a ordenação da coluna de Idade
+let isIdadeAsc = false; 
 
-// Evento de clique no cabeçalho de Idade para ordenar
 document.getElementById('idade-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
-        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
+        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); 
+        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); 
 
         return isIdadeAsc ? idadeA - idadeB : idadeB - idadeA; 
     });
@@ -290,7 +289,7 @@ document.getElementById('horas-header').onclick = function() {
         const horasA = a.cells[7].textContent.trim(); 
         const horasB = b.cells[7].textContent.trim(); 
 
-        // Conversão de HH:mm para minutos para comparação
+        
         const [hoursA, minutesA] = horasA.split(':').map(Number);
         const [hoursB, minutesB] = horasB.split(':').map(Number);
         
@@ -302,7 +301,7 @@ document.getElementById('horas-header').onclick = function() {
 
     isHorasAsc = !isHorasAsc; 
 
-    // Atualização do ícone
+   
     const sortHorasIcon = document.getElementById('sort-horas-icon');
     sortHorasIcon.className = isHorasAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortHorasIcon.style.display = 'inline';
@@ -310,3 +309,5 @@ document.getElementById('horas-header').onclick = function() {
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
+
+
