@@ -24,9 +24,10 @@ try {
     $filterLast6Hours = isset($_POST['filterLast6Hours']);
     $showAllData = isset($_POST['showAllData']);
 
+
     // Define a query base
     $queryBase = "
-        SELECT 
+       SELECT 
             HSP.HSP_NUM AS 'IH', 
             HSP.HSP_PAC AS 'REGISTRO', 
             PAC.PAC_NOME AS 'PACIENTE', 
@@ -34,9 +35,9 @@ try {
             LOC.LOC_NOME AS 'LEITO', 
             PSC.PSC_DHINI AS 'PRESCRICAO', 
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            HSP.HSP_DTHRE AS 'ADMISSÃO', 
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', 
-            HSP.HSP_DTHRA AS 'HSP_DTHRA' 
+            HSP.HSP_DTHRE AS 'ADMISSÃO', -- Adicionando a coluna de admissão
+            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', -- Cálculo da idade
+            HSP.HSP_DTHRA AS 'HSP_DTHRA' -- Adicionando a coluna de alta
         FROM 
             HSP 
         INNER JOIN LOC ON HSP_LOC = LOC_COD 
@@ -79,27 +80,34 @@ try {
     // Execute a consulta
     $query = $connection->query($queryBase);  
     $result = $query->fetchAll(PDO::FETCH_ASSOC); 
-    if (count($result) > 0) {
-        $groupedPatients = [];
-        foreach ($result as $row) {
-            $patientName = capitalizeFirstLetters($row['PACIENTE']);
-            if (!isset($groupedPatients[$patientName])) {
-                $groupedPatients[$patientName] = [
-                    'REGISTRO' => $row['REGISTRO'],
-                    'PACIENTE' => $patientName,
-                    'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
-                    'LEITO' => capitalizeFirstLetters($row['LEITO']),
-                    'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
-                    'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
-                    'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                    'IDADE' => $row['IDADE'],
-                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO' // Verifica se há alta
-                ];
-            } else {
-                $groupedPatients[$patientName]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
-            }
+  
+if (count($result) > 0) {
+    $groupedPatients = [];
+    foreach ($result as $row) {
+        $registro = $row['REGISTRO'];
+        $patientName = capitalizeFirstLetters($row['PACIENTE']);
+        
+        if (!isset($groupedPatients[$registro])) {
+            // Primeiro, cria uma nova entrada para o paciente com base no registro
+            $groupedPatients[$registro] = [
+                'REGISTRO' => $registro,
+                'PACIENTE' => $patientName,
+                'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
+                'LEITO' => capitalizeFirstLetters($row['LEITO']),
+                'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
+                'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
+                'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
+                'IDADE' => $row['IDADE'],
+                'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
+            ];
+        } else {
+            // Se o paciente já estiver no array, adiciona a dieta (evitando duplicatas)
+            $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+            $groupedPatients[$registro]['DIETAS'] = array_unique($groupedPatients[$registro]['DIETAS']); // Evita duplicatas
         }
+    }
 ?>
+
 
 
 
@@ -123,7 +131,8 @@ try {
 
         <form method="POST" action="">
     <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-    <button type="button" class="btn btn-secondary mb-3" id="showAllData">Mostrar Todos os Dados</button>
+    <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
+
 </form>
 
         
@@ -176,6 +185,8 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+
+
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
                     <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
                     <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
