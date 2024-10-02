@@ -11,7 +11,7 @@
 <body>
 
 
-<?php
+<?php 
 include 'conexao.php'; 
 include 'header.php';
 
@@ -20,14 +20,9 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    // Variáveis para controle de filtro
-    $filterLast6Hours = isset($_POST['filterLast6Hours']);
-    $showAllData = isset($_POST['showAllData']);
-
-
-    // Define a query base
-    $queryBase = "
-       SELECT 
+    // Consulta para buscar dados do paciente, incluindo a dieta
+    $query = $connection->query("
+        SELECT 
             HSP.HSP_NUM AS 'IH', 
             HSP.HSP_PAC AS 'REGISTRO', 
             PAC.PAC_NOME AS 'PACIENTE', 
@@ -48,22 +43,7 @@ try {
         WHERE 
             HSP_TRAT_INT = 'I' 
             AND HSP_STAT = 'A' 
-            AND PSC.PSC_STAT <> 'S' ";
-
-    // Se o filtro para as últimas 6 horas foi acionado, adicione a condição
-    if ($filterLast6Hours) {
-        $queryBase .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE()) ";
-    }
-
-    // Se o botão "Mostrar Todos os Dados" foi clicado, não adiciona condições de filtro
-    if ($showAllData) {
-        // Remover a condição de filtro anterior
-        $filterLast6Hours = false; // Isso garante que o filtro não seja aplicado
-    }
-
-    // Adiciona a condição para o último PSC se ainda estiver filtrando
-    if ($filterLast6Hours) {
-        $queryBase .= "
+            AND PSC.PSC_STAT <> 'S' 
             AND PSC.PSC_DHINI = (
                 SELECT MAX(PSCMAX.PSC_DHINI) 
                 FROM PSC PSCMAX 
@@ -71,58 +51,51 @@ try {
                 AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
                 AND PSCMAX.PSC_TIP = 'D' 
                 AND PSCMAX.PSC_STAT = 'A'
-            ) ";
-    }
-
-    $queryBase .= "
-        ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
-
-    // Execute a consulta
-    $query = $connection->query($queryBase);  
+            )
+        ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;
+    ");  
+    
     $result = $query->fetchAll(PDO::FETCH_ASSOC); 
-  
-if (count($result) > 0) {
-    $groupedPatients = [];
-    foreach ($result as $row) {
-        $registro = $row['REGISTRO'];
-        $patientName = capitalizeFirstLetters($row['PACIENTE']);
-        
-        if (!isset($groupedPatients[$registro])) {
-            // Primeiro, cria uma nova entrada para o paciente com base no registro
-            $groupedPatients[$registro] = [
-                'REGISTRO' => $registro,
-                'PACIENTE' => $patientName,
-                'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
-                'LEITO' => capitalizeFirstLetters($row['LEITO']),
-                'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
-                'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
-                'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                'IDADE' => $row['IDADE'],
-                'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
-            ];
-        } else {
-            // Se o paciente já estiver no array, adiciona a dieta (evitando duplicatas)
-            $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
-            $groupedPatients[$registro]['DIETAS'] = array_unique($groupedPatients[$registro]['DIETAS']); // Evita duplicatas
+
+    if (count($result) > 0) {
+        $groupedPatients = [];
+        foreach ($result as $row) {
+            $registro = $row['REGISTRO'];
+            $patientName = capitalizeFirstLetters($row['PACIENTE']);
+            
+            // Agrupando os dados do paciente
+            if (!isset($groupedPatients[$registro])) {
+                $groupedPatients[$registro] = [
+                    'REGISTRO' => $registro,
+                    'PACIENTE' => $patientName,
+                    'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
+                    'LEITO' => capitalizeFirstLetters($row['LEITO']),
+                    'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
+                    'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
+                    'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
+                    'IDADE' => $row['IDADE'],
+                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
+                ];
+            } else {
+                // Adicionando dietas ao paciente, evitando duplicatas
+                if (!empty($row['DIETA'])) {
+                    $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+                }
+            }
         }
+
+        // Remover duplicatas nas dietas
+        foreach ($groupedPatients as $registro => &$patient) {
+            $patient['DIETAS'] = array_unique($patient['DIETAS']);
+        }
+
+        // Aqui você pode adicionar o código para exibir os dados agrupados na sua tabela
     }
+
+} catch (Exception $e) {
+    echo "Erro: " . $e->getMessage();
+}
 ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <div class="container-fluid mt-5">
@@ -211,14 +184,7 @@ if (count($result) > 0) {
         </div>
     </div>
 </div>
-<?php 
-        } else {
-            echo "<p>Nenhum paciente encontrado.</p>";
-        }
-    } catch (Exception $e) {
-        echo "Erro ao executar a consulta: " . $e->getMessage();
-    }
-?>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="teste.js"></script>
 </body>
