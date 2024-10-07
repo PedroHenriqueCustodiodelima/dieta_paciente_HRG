@@ -22,34 +22,39 @@ function capitalizeFirstLetters($string) {
 try {
 
     $query = "
-        SELECT 
-            HSP.HSP_NUM AS 'IH', 
-            HSP.HSP_PAC AS 'REGISTRO', 
-            PAC.PAC_NOME AS 'PACIENTE', 
-            CNV.CNV_NOME AS 'CONVENIO', 
-            LOC.LOC_NOME AS 'LEITO', 
-            PSC.PSC_DHINI AS 'PRESCRICAO', 
-            ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            HSP.HSP_DTHRE AS 'ADMISSÃO', 
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', 
-            HSP.HSP_DTHRA AS 'HSP_DTHRA' 
-        FROM 
-            HSP 
-        INNER JOIN LOC ON HSP_LOC = LOC_COD 
-        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
-        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
-        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
-        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
-        WHERE 
-            HSP_TRAT_INT = 'I' 
-            AND HSP_STAT = 'A' 
-            AND PSC.PSC_STAT <> 'S' 
-    ";
+    SELECT 
+        HSP.HSP_NUM AS 'IH', 
+        HSP.HSP_PAC AS 'REGISTRO', 
+        PAC.PAC_NOME AS 'PACIENTE', 
+        CNV.CNV_NOME AS 'CONVENIO', 
+        LOC.LOC_NOME AS 'LEITO', 
+        PSC.PSC_DHINI AS 'PRESCRICAO', 
+        ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
+        HSP.HSP_DTHRE AS 'ADMISSÃO', 
+        CASE 
+            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
+                THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
+            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
+                THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
+        END AS 'IDADE', 
+        HSP.HSP_DTHRA AS 'HSP_DTHRA' 
+    FROM 
+        HSP 
+    INNER JOIN LOC ON HSP_LOC = LOC_COD 
+    INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
+    INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
+    LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
+    LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
+    WHERE 
+        HSP_TRAT_INT = 'I' 
+        AND HSP_STAT = 'A' 
+        AND PSC.PSC_STAT <> 'S' 
+";
+
 
     if (isset($_POST['filterLast6Hours'])) {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
     }
-
 
     $query .= " AND PSC.PSC_DHINI = (
         SELECT MAX(PSCMAX.PSC_DHINI) 
@@ -78,15 +83,17 @@ try {
                     'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
                     'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
                     'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                    'IDADE' => $row['IDADE'],
-                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
+                    'IDADE' => $row['IDADE'], // Atualizado aqui para usar 'IDADE'
+                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'ALTA' : 'ADMISSÃO'
                 ];
+                
             } else {
                 if (!empty($row['DIETA'])) {
                     $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
                 }
             }
         }
+        
 
         foreach ($groupedPatients as $registro => &$patient) {
             $patient['DIETAS'] = array_unique($patient['DIETAS']);
@@ -98,6 +105,7 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 
 
 <div class="container-fluid mt-5">
@@ -159,10 +167,15 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-
-
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
-                    <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
+
+                    <td class="text-center align-middle ">
+    <?= htmlspecialchars($patient['IDADE']); ?>
+</td>
+
+
+
+
                     <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
                 </tr>

@@ -68,10 +68,14 @@ function updateTableAndPagination(rows) {
 
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
     currentPage++;
     if (currentPage > totalPages) {
         currentPage = 1; 
     }
+    
+    console.log(`Página atual após: ${currentPage}`);
+
 
     updateTableAndPagination(filteredRows);
     updateProgressBar(); 
@@ -107,6 +111,11 @@ function stopAutoPagination() {
     clearInterval(autoPageInterval);
     clearInterval(progressInterval);
 }
+showPage(currentPage, filteredRows);
+startAutoPagination(); 
+
+
+
 
 function filterTable() {
     const filterValue = document.getElementById('filterInput').value.toLowerCase();
@@ -115,9 +124,14 @@ function filterTable() {
             return cell.textContent.toLowerCase().includes(filterValue);
         });
     }) : tableRows;
-
+    
     currentPage = 1; 
     updateTableAndPagination(filteredRows);
+}
+
+function updateTableAndPagination(rows) {
+    showPage(currentPage, rows);
+    updatePagination(rows);
 }
 
 prevSetBtn.onclick = () => {
@@ -140,12 +154,20 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'PageUp' && currentPage > 1) {
         currentPage--;
     }
-    updateTableAndPagination(filteredRows);
+    showPage(currentPage, filteredRows);
+    updatePagination(filteredRows);
 });
+
+
+function convertToDate(dateStr) {
+    const parts = dateStr.split('/'); 
+    return new Date(parts[2], parts[1] - 1, parts[0]); 
+}
 
 let isAsc = false; 
 const prescricaoHeader = document.getElementById('prescricao-header');
 const sortIcon = document.getElementById('sort-icon');
+
 
 prescricaoHeader.onclick = function() {
     filteredRows.sort((a, b) => {
@@ -163,31 +185,13 @@ prescricaoHeader.onclick = function() {
     updatePagination(filteredRows); 
 };
 
-function convertToDate(dateStr) {
-    const parts = dateStr.split('/'); 
-    return new Date(parts[2], parts[1] - 1, parts[0]); 
-}
 
-let isAdmissaoAsc = false; 
-const admissaoHeader = document.getElementById('admissao-header');
-const sortAdmissaoIcon = document.getElementById('sort-admissao-icon'); 
 
-admissaoHeader.onclick = function() {
-    filteredRows.sort((a, b) => {
-        const dateTimeA = convertToDateTime(a.cells[6].textContent.trim()); 
-        const dateTimeB = convertToDateTime(b.cells[6].textContent.trim()); 
-        
-        return isAdmissaoAsc ? dateTimeA - dateTimeB : dateTimeB - dateTimeA; 
-    });
 
-    isAdmissaoAsc = !isAdmissaoAsc; 
-    sortAdmissaoIcon.className = isAdmissaoAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
-    sortAdmissaoIcon.style.display = 'inline';
 
-    currentPage = 1; 
-    updatePagination(filteredRows); 
-};
 
+
+// Função para converter string de data e hora para um objeto Date
 function convertToDateTime(dateStr) {
     const [datePart, timePart] = dateStr.split(' ');
     const parts = datePart.split('/'); 
@@ -195,34 +199,90 @@ function convertToDateTime(dateStr) {
     return new Date(parts[2], parts[1] - 1, parts[0], timeParts[0], timeParts[1]);
 }
 
-let isConvenioAsc = false; // Para controlar a ordenação da coluna de Convênio
-document.getElementById('convenio-header').onclick = function() {
-    filteredRows.sort((a, b) => {
-        const convenioA = a.cells[2].textContent.trim().toLowerCase(); 
-        const convenioB = b.cells[2].textContent.trim().toLowerCase(); 
+const admissaoHeader = document.getElementById('admissao-header');
+const sortAdmissaoIcon = document.getElementById('sort-admissao-icon');
+let isAdmissaoAsc = false; 
 
-        return isConvenioAsc ? convenioA.localeCompare(convenioB) : convenioB.localeCompare(convenioA);
+// Adiciona evento de clique ao cabeçalho da coluna de admissão
+admissaoHeader.onclick = function() {
+    filteredRows.sort((a, b) => {
+        const dateTimeA = convertToDateTime(a.cells[6].textContent.trim()); 
+        const dateTimeB = convertToDateTime(b.cells[6].textContent.trim()); 
+
+        // Calcula a idade em dias e anos
+        const ageInDaysA = Math.floor((new Date() - dateTimeA) / (1000 * 60 * 60 * 24));
+        const ageInDaysB = Math.floor((new Date() - dateTimeB) / (1000 * 60 * 60 * 24));
+        
+        // Compara as idades em dias primeiro
+        if (ageInDaysA < 365 && ageInDaysB < 365) {
+            // Ambos são menores que 365 dias
+            return isAdmissaoAsc ? ageInDaysA - ageInDaysB : ageInDaysB - ageInDaysA;
+        } else if (ageInDaysA < 365) {
+            // A é menor que 365 dias, B é maior ou igual a 365 dias
+            return isAdmissaoAsc ? -1 : 1;
+        } else if (ageInDaysB < 365) {
+            // B é menor que 365 dias, A é maior ou igual a 365 dias
+            return isAdmissaoAsc ? 1 : -1;
+        }
+
+        // Ambos têm 365 dias ou mais, ordena por anos
+        return isAdmissaoAsc ? (ageInDaysA - ageInDaysB) : (ageInDaysB - ageInDaysA);
     });
 
-    isConvenioAsc = !isConvenioAsc; 
-    const sortConvenioIcon = document.getElementById('sort-convenio-icon');
-    sortConvenioIcon.className = isConvenioAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
-    sortConvenioIcon.style.display = 'inline';
+    isAdmissaoAsc = !isAdmissaoAsc; 
+
+    // Atualiza o ícone de ordenação
+    sortAdmissaoIcon.className = isAdmissaoAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
+    sortAdmissaoIcon.style.display = 'inline';
 
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
 
+
+
+
+
+
+// ordenar a idade do paciente
+
+
+let isConvenioAsc = false; 
+
+
+document.getElementById('convenio-header').onclick = function() {
+    filteredRows.sort((a, b) => {
+        const convenioA = a.cells[2].textContent.trim().toLowerCase(); 
+        const convenioB = b.cells[2].textContent.trim().toLowerCase(); 
+
+        if (convenioA < convenioB) return isConvenioAsc ? -1 : 1;
+        if (convenioA > convenioB) return isConvenioAsc ? 1 : -1;
+        return 0;
+    });
+
+    isConvenioAsc = !isConvenioAsc; 
+
+    // Atualização do ícone
+    const sortConvenioIcon = document.getElementById('sort-convenio-icon');
+    sortConvenioIcon.className = isConvenioAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
+    sortConvenioIcon.style.display = 'inline';
+
+    currentPage = 1; // Reseta para a primeira página
+    updatePagination(filteredRows); 
+};
 let isIdadeAsc = false; // Para controlar a ordenação da coluna de Idade
+
+// Evento de clique no cabeçalho de Idade para ordenar
 document.getElementById('idade-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const idadeA = parseInt(a.cells[3].textContent.trim()); 
-        const idadeB = parseInt(b.cells[3].textContent.trim()); 
+        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
+        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
 
         return isIdadeAsc ? idadeA - idadeB : idadeB - idadeA; 
     });
 
     isIdadeAsc = !isIdadeAsc; 
+
     const sortIdadeIcon = document.getElementById('sort-idade-icon');
     sortIdadeIcon.className = isIdadeAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortIdadeIcon.style.display = 'inline';
@@ -230,7 +290,50 @@ document.getElementById('idade-header').onclick = function() {
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
+let isPacienteAsc = false; 
+document.getElementById('paciente-header').onclick = function() {
+    filteredRows.sort((a, b) => {
+        const pacienteA = a.cells[1].textContent.trim().toLowerCase(); 
+        const pacienteB = b.cells[1].textContent.trim().toLowerCase(); 
 
-document.getElementById('filterInput').addEventListener('input', filterTable);
-updateTableAndPagination(filteredRows);
-startAutoPagination();
+        if (pacienteA < pacienteB) return isPacienteAsc ? -1 : 1;
+        if (pacienteA > pacienteB) return isPacienteAsc ? 1 : -1;
+        return 0;
+    });
+
+    isPacienteAsc = !isPacienteAsc; 
+
+    const sortPacienteIcon = document.getElementById('sort-paciente-icon');
+    sortPacienteIcon.className = isPacienteAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
+    sortPacienteIcon.style.display = 'inline';
+
+    currentPage = 1; 
+    updatePagination(filteredRows); 
+};
+let isHorasAsc = false; 
+
+document.getElementById('horas-header').onclick = function() {
+    filteredRows.sort((a, b) => {
+        const horasA = a.cells[7].textContent.trim(); 
+        const horasB = b.cells[7].textContent.trim(); 
+
+        // Conversão de HH:mm para minutos para comparação
+        const [hoursA, minutesA] = horasA.split(':').map(Number);
+        const [hoursB, minutesB] = horasB.split(':').map(Number);
+        
+        const totalMinutesA = hoursA * 60 + minutesA;
+        const totalMinutesB = hoursB * 60 + minutesB;
+
+        return isHorasAsc ? totalMinutesA - totalMinutesB : totalMinutesB - totalMinutesA; 
+    });
+
+    isHorasAsc = !isHorasAsc; 
+
+    // Atualização do ícone
+    const sortHorasIcon = document.getElementById('sort-horas-icon');
+    sortHorasIcon.className = isHorasAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
+    sortHorasIcon.style.display = 'inline';
+
+    currentPage = 1; 
+    updatePagination(filteredRows); 
+};
