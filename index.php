@@ -22,44 +22,123 @@ function capitalizeFirstLetters($string) {
 try {
 
     $query = "
-        SELECT 
-            HSP.HSP_NUM AS 'IH', 
-            HSP.HSP_PAC AS 'REGISTRO', 
-            PAC.PAC_NOME AS 'PACIENTE', 
-            CNV.CNV_NOME AS 'CONVENIO', 
-            LOC.LOC_NOME AS 'LEITO', 
-            PSC.PSC_DHINI AS 'PRESCRICAO', 
-            ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-            HSP.HSP_DTHRE AS 'ADMISSÃO', 
-            DATEDIFF(year, PAC.PAC_NASC, GETDATE()) AS 'IDADE', 
-            HSP.HSP_DTHRA AS 'HSP_DTHRA' 
+          SELECT 
+            'ADMISSAO' AS TIPO,
+            HSP.HSP_NUM AS IH,
+            HSP.HSP_DTHRE AS DATA_EVENTO,
+            HSP.HSP_PAC AS REGISTRO,
+            PAC.PAC_NOME AS PACIENTE,
+            CASE 
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
+                THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
+                THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
+            END AS Idade,
+            CNV.CNV_NOME AS CONVENIO,
+            RTRIM(STR.STR_NOME) AS UNIDADE,
+            LOC.LOC_NOME AS LEITO,
+            ISNULL(PSC.PSC_DHINI, '') AS PRESCRICAO,
+            ISNULL(ADP.ADP_NOME, '') AS DIETA,
+            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE()) AS horas
         FROM 
             HSP 
         INNER JOIN LOC ON HSP_LOC = LOC_COD 
-        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
-        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
-        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
-        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
+        INNER JOIN STR ON STR_COD = LOC_STR
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM 
+                         AND PSC.PSC_PAC = HSP.HSP_PAC 
+                         AND PSC.PSC_TIP = 'D'
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP 
+                         AND ADP_TIPO = 'D'
         WHERE 
-            HSP_TRAT_INT = 'I' 
-            AND HSP_STAT = 'A' 
-            AND PSC.PSC_STAT <> 'S' 
-    ";
+            HSP_TRAT_INT = 'I'
+            AND HSP_STAT = 'A'
+            AND PSC.PSC_STAT <> 'S'
+            AND PSC.PSC_DHINI = (
+                SELECT MAX(PSCMAX.PSC_DHINI) 
+                FROM PSC PSCMAX 
+                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+                AND PSCMAX.PSC_HSP = PSC.PSC_HSP
+                AND PSCMAX.PSC_TIP = 'D'
+                AND PSCMAX.PSC_STAT = 'A'
+            )
+            AND DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) <= 6
+        GROUP BY 
+            HSP.HSP_NUM,
+            HSP.HSP_PAC,
+            PAC.PAC_NOME,
+            PAC.PAC_NASC,
+            CNV.CNV_NOME,
+            STR.STR_NOME,
+            LOC.LOC_NOME,
+            HSP.HSP_DTHRE,
+            PSC.PSC_ADP,
+            ADP.ADP_NOME,
+            ISNULL(PSC.PSC_DHINI, ''), 
+            DATEDIFF(hour, HSP.HSP_DTHRE, GETDATE())
 
-    if (isset($_POST['filterLast6Hours'])) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
-    }
+        UNION ALL
 
+        SELECT 
+            'ALTA' AS TIPO,
+            HSP.HSP_NUM AS IH,
+            HSP.HSP_DTHRA AS DATA_EVENTO,
+            HSP.HSP_PAC AS REGISTRO,
+            PAC.PAC_NOME AS PACIENTE,
+            CASE 
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
+                THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
+                THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
+            END AS Idade,
+            CNV.CNV_NOME AS CONVENIO,
+            RTRIM(STR.STR_NOME) AS UNIDADE,
+            LOC.LOC_NOME AS LEITO,
+            ISNULL(PSC.PSC_DHINI, '') AS PRESCRICAO,
+            ISNULL(ADP.ADP_NOME, '') AS DIETA,
+            DATEDIFF(hour, HSP.HSP_DTHRA, GETDATE()) AS horas
+        FROM 
+            HSP 
+        INNER JOIN LOC ON HSP_LOC = LOC_COD 
+        INNER JOIN STR ON STR_COD = LOC_STR
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM 
+                         AND PSC.PSC_PAC = HSP.HSP_PAC 
+                         AND PSC.PSC_TIP = 'D'
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP 
+                         AND ADP_TIPO = 'D'
+        WHERE 
+            HSP_TRAT_INT = 'I'
+            AND HSP_STAT = 'E'
+            AND PSC.PSC_STAT <> 'S'
+            AND PSC.PSC_DHINI = (
+                SELECT MAX(PSCMAX.PSC_DHINI) 
+                FROM PSC PSCMAX 
+                WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
+                AND PSCMAX.PSC_HSP = PSC.PSC_HSP
+                AND PSCMAX.PSC_TIP = 'D'
+                AND PSCMAX.PSC_STAT = 'A'
+            )
+            AND DATEDIFF(HOUR, HSP.HSP_DTHRA, GETDATE()) <= 12
+        GROUP BY 
+            HSP.HSP_NUM,
+            HSP.HSP_PAC,
+            PAC.PAC_NOME,
+            PAC.PAC_NASC,
+            CNV.CNV_NOME,
+            STR.STR_NOME,
+            LOC.LOC_NOME,
+            HSP.HSP_DTHRA,
+            PSC.PSC_ADP,
+            ADP.ADP_NOME,
+            ISNULL(PSC.PSC_DHINI, ''), 
+            DATEDIFF(hour, HSP.HSP_DTHRA, GETDATE())
 
-    $query .= " AND PSC.PSC_DHINI = (
-        SELECT MAX(PSCMAX.PSC_DHINI) 
-        FROM PSC PSCMAX 
-        WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-        AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
-        AND PSCMAX.PSC_TIP = 'D' 
-        AND PSCMAX.PSC_STAT = 'A'
-    ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
-
+        ORDER BY 
+            PAC.PAC_NOME,
+            LOC.LOC_NOME;";
     
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -78,8 +157,9 @@ try {
                     'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
                     'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
                     'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                    'IDADE' => $row['IDADE'],
-                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'SIM' : 'NÃO'
+                    'IDADE' => $row['Idade'],
+                    'HORAS' => $row['horas'],
+                    'TIPO' => $row['TIPO'],
                 ];
             } else {
                 if (!empty($row['DIETA'])) {
@@ -225,7 +305,8 @@ try {
 
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
                     <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
-                    <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
+                    <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['TIPO']); ?></td>
+                     <!-- Coluna de alta -->
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
                 </tr>
                 <?php 

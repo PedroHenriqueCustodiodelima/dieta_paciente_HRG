@@ -68,14 +68,10 @@ function updateTableAndPagination(rows) {
 
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
     currentPage++;
     if (currentPage > totalPages) {
         currentPage = 1; 
     }
-    
-    console.log(`Página atual após: ${currentPage}`);
-
 
     updateTableAndPagination(filteredRows);
     updateProgressBar(); 
@@ -111,11 +107,6 @@ function stopAutoPagination() {
     clearInterval(autoPageInterval);
     clearInterval(progressInterval);
 }
-showPage(currentPage, filteredRows);
-startAutoPagination(); 
-
-
-
 
 function filterTable() {
     const filterValue = document.getElementById('filterInput').value.toLowerCase();
@@ -124,14 +115,9 @@ function filterTable() {
             return cell.textContent.toLowerCase().includes(filterValue);
         });
     }) : tableRows;
-    
+
     currentPage = 1; 
     updateTableAndPagination(filteredRows);
-}
-
-function updateTableAndPagination(rows) {
-    showPage(currentPage, rows);
-    updatePagination(rows);
 }
 
 prevSetBtn.onclick = () => {
@@ -154,20 +140,12 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'PageUp' && currentPage > 1) {
         currentPage--;
     }
-    showPage(currentPage, filteredRows);
-    updatePagination(filteredRows);
+    updateTableAndPagination(filteredRows);
 });
-
-
-function convertToDate(dateStr) {
-    const parts = dateStr.split('/'); 
-    return new Date(parts[2], parts[1] - 1, parts[0]); 
-}
 
 let isAsc = false; 
 const prescricaoHeader = document.getElementById('prescricao-header');
 const sortIcon = document.getElementById('sort-icon');
-
 
 prescricaoHeader.onclick = function() {
     filteredRows.sort((a, b) => {
@@ -185,24 +163,14 @@ prescricaoHeader.onclick = function() {
     updatePagination(filteredRows); 
 };
 
-function convertToDateTime(dateStr) {
-    const [datePart, timePart] = dateStr.split(' ');
-    const parts = datePart.split('/'); 
-    const timeParts = timePart.split(':'); 
-
-    return new Date(parts[2], parts[1] - 1, parts[0], timeParts[0], timeParts[1]);
-}
-
-const admissaoHeader = document.getElementById('admissao-header');
-const sortAdmissaoIcon = document.getElementById('sort-admissao-icon'); 
-function convertToDateTime(dateStr) {
-    const [datePart, timePart] = dateStr.split(' ');
-    const parts = datePart.split('/'); 
-    const timeParts = timePart.split(':'); 
-    return new Date(parts[2], parts[1] - 1, parts[0], timeParts[0], timeParts[1]);
+function convertToDate(dateStr) {
+    const parts = dateStr.split('/'); 
+    return new Date(parts[2], parts[1] - 1, parts[0]); 
 }
 
 let isAdmissaoAsc = false; 
+const admissaoHeader = document.getElementById('admissao-header');
+const sortAdmissaoIcon = document.getElementById('sort-admissao-icon'); 
 
 admissaoHeader.onclick = function() {
     filteredRows.sort((a, b) => {
@@ -213,49 +181,48 @@ admissaoHeader.onclick = function() {
     });
 
     isAdmissaoAsc = !isAdmissaoAsc; 
-
     sortAdmissaoIcon.className = isAdmissaoAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortAdmissaoIcon.style.display = 'inline';
 
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isConvenioAsc = false; // Para controlar a ordenação da coluna de Convênio
 
-// Evento de clique no cabeçalho de Convênio para ordenar
+function convertToDateTime(dateStr) {
+    const [datePart, timePart] = dateStr.split(' ');
+    const parts = datePart.split('/'); 
+    const timeParts = timePart.split(':'); 
+    return new Date(parts[2], parts[1] - 1, parts[0], timeParts[0], timeParts[1]);
+}
+
+let isConvenioAsc = false; // Para controlar a ordenação da coluna de Convênio
 document.getElementById('convenio-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const convenioA = a.cells[2].textContent.trim().toLowerCase(); // Índice 2, ajuste se necessário
-        const convenioB = b.cells[2].textContent.trim().toLowerCase(); // Índice 2, ajuste se necessário
+        const convenioA = a.cells[2].textContent.trim().toLowerCase(); 
+        const convenioB = b.cells[2].textContent.trim().toLowerCase(); 
 
-        if (convenioA < convenioB) return isConvenioAsc ? -1 : 1;
-        if (convenioA > convenioB) return isConvenioAsc ? 1 : -1;
-        return 0;
+        return isConvenioAsc ? convenioA.localeCompare(convenioB) : convenioB.localeCompare(convenioA);
     });
 
     isConvenioAsc = !isConvenioAsc; 
-
-    // Atualização do ícone
     const sortConvenioIcon = document.getElementById('sort-convenio-icon');
     sortConvenioIcon.className = isConvenioAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortConvenioIcon.style.display = 'inline';
 
-    currentPage = 1; // Reseta para a primeira página
+    currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isIdadeAsc = false; // Para controlar a ordenação da coluna de Idade
 
-// Evento de clique no cabeçalho de Idade para ordenar
+let isIdadeAsc = false; // Para controlar a ordenação da coluna de Idade
 document.getElementById('idade-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
-        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
+        const idadeA = parseInt(a.cells[3].textContent.trim()); 
+        const idadeB = parseInt(b.cells[3].textContent.trim()); 
 
         return isIdadeAsc ? idadeA - idadeB : idadeB - idadeA; 
     });
 
     isIdadeAsc = !isIdadeAsc; 
-
     const sortIdadeIcon = document.getElementById('sort-idade-icon');
     sortIdadeIcon.className = isIdadeAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortIdadeIcon.style.display = 'inline';
@@ -263,50 +230,7 @@ document.getElementById('idade-header').onclick = function() {
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isPacienteAsc = false; 
-document.getElementById('paciente-header').onclick = function() {
-    filteredRows.sort((a, b) => {
-        const pacienteA = a.cells[1].textContent.trim().toLowerCase(); 
-        const pacienteB = b.cells[1].textContent.trim().toLowerCase(); 
 
-        if (pacienteA < pacienteB) return isPacienteAsc ? -1 : 1;
-        if (pacienteA > pacienteB) return isPacienteAsc ? 1 : -1;
-        return 0;
-    });
-
-    isPacienteAsc = !isPacienteAsc; 
-
-    const sortPacienteIcon = document.getElementById('sort-paciente-icon');
-    sortPacienteIcon.className = isPacienteAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
-    sortPacienteIcon.style.display = 'inline';
-
-    currentPage = 1; 
-    updatePagination(filteredRows); 
-};
-let isHorasAsc = false; 
-
-document.getElementById('horas-header').onclick = function() {
-    filteredRows.sort((a, b) => {
-        const horasA = a.cells[7].textContent.trim(); 
-        const horasB = b.cells[7].textContent.trim(); 
-
-        // Conversão de HH:mm para minutos para comparação
-        const [hoursA, minutesA] = horasA.split(':').map(Number);
-        const [hoursB, minutesB] = horasB.split(':').map(Number);
-        
-        const totalMinutesA = hoursA * 60 + minutesA;
-        const totalMinutesB = hoursB * 60 + minutesB;
-
-        return isHorasAsc ? totalMinutesA - totalMinutesB : totalMinutesB - totalMinutesA; 
-    });
-
-    isHorasAsc = !isHorasAsc; 
-
-    // Atualização do ícone
-    const sortHorasIcon = document.getElementById('sort-horas-icon');
-    sortHorasIcon.className = isHorasAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
-    sortHorasIcon.style.display = 'inline';
-
-    currentPage = 1; 
-    updatePagination(filteredRows); 
-};
+document.getElementById('filterInput').addEventListener('input', filterTable);
+updateTableAndPagination(filteredRows);
+startAutoPagination();
