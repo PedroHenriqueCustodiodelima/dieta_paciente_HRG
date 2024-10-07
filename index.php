@@ -10,7 +10,6 @@
 </head>
 <body>
 
-
 <?php 
 include 'conexao.php'; 
 include 'header.php';
@@ -20,7 +19,6 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-
     $query = "
     SELECT 
         HSP.HSP_NUM AS 'IH', 
@@ -51,7 +49,6 @@ try {
         AND PSC.PSC_STAT <> 'S' 
 ";
 
-
     if (isset($_POST['filterLast6Hours'])) {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
     }
@@ -65,46 +62,55 @@ try {
         AND PSCMAX.PSC_STAT = 'A'
     ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
 
-    
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($result) > 0) {
         $groupedPatients = [];
+        
         foreach ($result as $row) {
-            $registro = $row['REGISTRO'];
+            // Capitalizar o nome completo do paciente
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
-            
-            if (!isset($groupedPatients[$registro])) {
-                $groupedPatients[$registro] = [
-                    'REGISTRO' => $registro,
+            $convenio = capitalizeFirstLetters($row['CONVENIO']);
+            $leito = capitalizeFirstLetters($row['LEITO']);
+            $prescricao = date('d/m/Y', strtotime($row['PRESCRICAO']));
+            $admissao = date('d/m/Y H:i', strtotime($row['ADMISSÃO']));
+            $idade = $row['IDADE'];
+            $alta = !empty($row['HSP_DTHRA']) ? 'ALTA' : 'ADMISSÃO';
+
+            // Verificar se já existe um paciente com esse nome completo
+            if (!isset($groupedPatients[$patientName])) {
+                $groupedPatients[$patientName] = [
+                    'REGISTRO' => $row['REGISTRO'],
                     'PACIENTE' => $patientName,
-                    'CONVENIO' => capitalizeFirstLetters($row['CONVENIO']),
-                    'LEITO' => capitalizeFirstLetters($row['LEITO']),
-                    'PRESCRICAO' => date('d/m/Y', strtotime($row['PRESCRICAO'])),
-                    'DIETAS' => [capitalizeFirstLetters($row['DIETA'])],
-                    'ADMISSÃO' => date('d/m/Y H:i', strtotime($row['ADMISSÃO'])),
-                    'IDADE' => $row['IDADE'], // Atualizado aqui para usar 'IDADE'
-                    'ALTA' => !empty($row['HSP_DTHRA']) ? 'ALTA' : 'ADMISSÃO'
+                    'CONVENIO' => $convenio,
+                    'LEITO' => $leito,
+                    'PRESCRICAO' => $prescricao,
+                    'DIETAS' => [], // Mantenha como um array vazio
+                    'ADMISSÃO' => $admissao,
+                    'IDADE' => $idade,
+                    'ALTA' => $alta
                 ];
-                
-            } else {
-                if (!empty($row['DIETA'])) {
-                    $groupedPatients[$registro]['DIETAS'][] = capitalizeFirstLetters($row['DIETA']);
+            }
+            
+            // Adicionar dieta, se disponível
+            if (!empty($row['DIETA'])) {
+                // Verificar se a dieta já está adicionada
+                $dietName = capitalizeFirstLetters($row['DIETA']);
+                if (!in_array($dietName, $groupedPatients[$patientName]['DIETAS'])) {
+                    $groupedPatients[$patientName]['DIETAS'][] = $dietName;
                 }
             }
         }
-        
 
-        foreach ($groupedPatients as $registro => &$patient) {
-            $patient['DIETAS'] = array_unique($patient['DIETAS']);
-        }
-
+        // Reorganizar o array para a tabela
+        $groupedPatients = array_values($groupedPatients);
     }
 
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 
 
 
