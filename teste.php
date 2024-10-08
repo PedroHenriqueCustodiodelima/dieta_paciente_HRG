@@ -23,7 +23,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $hoursFilter = 12; // Filtro padrão
+    $hoursFilter = 12; 
 
     if (isset($_POST['filter'])) {
         switch ($_POST['filter']) {
@@ -37,7 +37,7 @@ try {
                 $hoursFilter = 24;
                 break;
             default:
-                $hoursFilter = 24; // Filtro padrão se nenhum for selecionado
+                $hoursFilter = 24; 
                 break;
         }
     }
@@ -76,7 +76,7 @@ try {
     ";
 
     if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; // Filtro com base nas horas selecionadas
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
     $query .= " 
         UNION ALL

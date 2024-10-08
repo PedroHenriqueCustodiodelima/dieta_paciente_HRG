@@ -191,7 +191,6 @@ prescricaoHeader.onclick = function() {
 
 
 
-// Função para converter string de data e hora para um objeto Date
 function convertToDateTime(dateStr) {
     const [datePart, timePart] = dateStr.split(' ');
     const parts = datePart.split('/'); 
@@ -202,36 +201,23 @@ function convertToDateTime(dateStr) {
 const admissaoHeader = document.getElementById('admissao-header');
 const sortAdmissaoIcon = document.getElementById('sort-admissao-icon');
 let isAdmissaoAsc = false; 
-
-// Adiciona evento de clique ao cabeçalho da coluna de admissão
 admissaoHeader.onclick = function() {
     filteredRows.sort((a, b) => {
         const dateTimeA = convertToDateTime(a.cells[6].textContent.trim()); 
         const dateTimeB = convertToDateTime(b.cells[6].textContent.trim()); 
-
-        // Calcula a idade em dias e anos
         const ageInDaysA = Math.floor((new Date() - dateTimeA) / (1000 * 60 * 60 * 24));
         const ageInDaysB = Math.floor((new Date() - dateTimeB) / (1000 * 60 * 60 * 24));
-        
-        // Compara as idades em dias primeiro
         if (ageInDaysA < 365 && ageInDaysB < 365) {
-            // Ambos são menores que 365 dias
             return isAdmissaoAsc ? ageInDaysA - ageInDaysB : ageInDaysB - ageInDaysA;
         } else if (ageInDaysA < 365) {
-            // A é menor que 365 dias, B é maior ou igual a 365 dias
             return isAdmissaoAsc ? -1 : 1;
         } else if (ageInDaysB < 365) {
-            // B é menor que 365 dias, A é maior ou igual a 365 dias
             return isAdmissaoAsc ? 1 : -1;
         }
-
-        // Ambos têm 365 dias ou mais, ordena por anos
         return isAdmissaoAsc ? (ageInDaysA - ageInDaysB) : (ageInDaysB - ageInDaysA);
     });
 
     isAdmissaoAsc = !isAdmissaoAsc; 
-
-    // Atualiza o ícone de ordenação
     sortAdmissaoIcon.className = isAdmissaoAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortAdmissaoIcon.style.display = 'inline';
 
@@ -261,22 +247,18 @@ document.getElementById('convenio-header').onclick = function() {
     });
 
     isConvenioAsc = !isConvenioAsc; 
-
-    // Atualização do ícone
     const sortConvenioIcon = document.getElementById('sort-convenio-icon');
     sortConvenioIcon.className = isConvenioAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortConvenioIcon.style.display = 'inline';
 
-    currentPage = 1; // Reseta para a primeira página
+    currentPage = 1; 
     updatePagination(filteredRows); 
 };
-let isIdadeAsc = false; // Para controlar a ordenação da coluna de Idade
-
-// Evento de clique no cabeçalho de Idade para ordenar
+let isIdadeAsc = false; 
 document.getElementById('idade-header').onclick = function() {
     filteredRows.sort((a, b) => {
-        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
-        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); // Índice 7, ajuste se necessário
+        const idadeA = parseInt(a.cells[7].textContent.trim(), 10); 
+        const idadeB = parseInt(b.cells[7].textContent.trim(), 10); 
 
         return isIdadeAsc ? idadeA - idadeB : idadeB - idadeA; 
     });
@@ -316,8 +298,6 @@ document.getElementById('horas-header').onclick = function() {
     filteredRows.sort((a, b) => {
         const horasA = a.cells[7].textContent.trim(); 
         const horasB = b.cells[7].textContent.trim(); 
-
-        // Conversão de HH:mm para minutos para comparação
         const [hoursA, minutesA] = horasA.split(':').map(Number);
         const [hoursB, minutesB] = horasB.split(':').map(Number);
         
@@ -328,8 +308,6 @@ document.getElementById('horas-header').onclick = function() {
     });
 
     isHorasAsc = !isHorasAsc; 
-
-    // Atualização do ícone
     const sortHorasIcon = document.getElementById('sort-horas-icon');
     sortHorasIcon.className = isHorasAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortHorasIcon.style.display = 'inline';
