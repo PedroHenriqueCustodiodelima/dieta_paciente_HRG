@@ -244,7 +244,7 @@ admissaoHeader.onclick = function() {
 
 
 
-// ordenar a idade do paciente
+// ordenar a idade
 
 
 let isConvenioAsc = false; 

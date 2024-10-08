@@ -53,6 +53,11 @@ try {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
     }
 
+    // Novo filtro para as últimas 12 horas
+    if (isset($_POST['filterLast12Hours'])) {
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -12, GETDATE())";
+    }
+
     $query .= " AND PSC.PSC_DHINI = (
         SELECT MAX(PSCMAX.PSC_DHINI) 
         FROM PSC PSCMAX 
@@ -119,49 +124,46 @@ try {
         <div class="col-12">
 
         <form method="POST" action="">
-                <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-                <button type="submit" class="btn btn-secondary mb-3" id="showAllData" name="showAllData">Mostrar Todos os Dados</button>
-            </form>
+            <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
+            <button type="submit" class="btn btn-secondary mb-3" id="filterLast12Hours" name="filterLast12Hours">Filtrar Últimas 12 Horas</button>
+        </form>
+        <div class="mb-3">
+            <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
+        </div>
+        <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
+            <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
+        </div>
 
-        
-                <div class="mb-3">
-                    <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
-                </div>
-                <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
-                    <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
-                </div>
-
-
-                <table class="table table-striped table-bordered table-hover">
-    <thead style="background-color: green; color:white;">
-        <tr>
-            <th>Registro</th>
-            <th id="paciente-header" style="cursor: pointer;">
-                Paciente
-                <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i>
-            </th>
-            <th id="convenio-header" style="cursor: pointer;">
-                Convênio
-                <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i>
-            </th>
-            <th>Leito</th>
-            <th id="prescricao-header" style="min-width: 150px;">
-                Prescrição 
-                <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
-            </th>
-            <th>Dieta</th>
-            <th id="admissao-header" style="min-width: 150px;">
-                Data
-                <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i>
-            </th>
-            <th id="idade-header" style="cursor: pointer; min-width: 150px;">
-                Idade
-                <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i>
-            </th>
-            <th id="alta-header" style="min-width: 150px;">ALTA</th> 
-            <th>Acompanhante</th>
-        </tr>
-    </thead>
+        <table class="table table-striped table-bordered table-hover">
+            <thead style="background-color: green; color:white;">
+                <tr>
+                    <th>Registro</th>
+                    <th id="paciente-header" style="cursor: pointer;">
+                        Paciente
+                        <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i>
+                    </th>
+                    <th id="convenio-header" style="cursor: pointer;">
+                        Convênio
+                        <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i>
+                    </th>
+                    <th>Leito</th>
+                    <th id="prescricao-header" style="min-width: 150px;">
+                        Prescrição 
+                        <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
+                    </th>
+                    <th>Dieta</th>
+                    <th id="admissao-header" style="min-width: 150px;">
+                        Data
+                        <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i>
+                    </th>
+                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">
+                        Idade
+                        <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i>
+                    </th>
+                    <th id="alta-header" style="min-width: 150px;">ALTA</th> 
+                    <th>Acompanhante</th>
+                </tr>
+            </thead>
             <tbody id="table-body">
                 <?php 
                 foreach ($groupedPatients as $patient) { 
