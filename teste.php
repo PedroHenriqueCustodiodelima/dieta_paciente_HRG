@@ -7,6 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="teste.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 </head>
 <body>
 
@@ -20,11 +23,23 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $hoursFilter = 24; 
-    if (isset($_POST['filterLast6Hours'])) {
-        $hoursFilter = 6;
-    } elseif (isset($_POST['filterLast12Hours'])) {
-        $hoursFilter = 12;
+    $hoursFilter = 12; // Filtro padrão
+
+    if (isset($_POST['filter'])) {
+        switch ($_POST['filter']) {
+            case 'last6hours':
+                $hoursFilter = 6;
+                break;
+            case 'last12hours':
+                $hoursFilter = 12;
+                break;
+            case 'last24hours':
+                $hoursFilter = 24;
+                break;
+            default:
+                $hoursFilter = 24; // Filtro padrão se nenhum for selecionado
+                break;
+        }
     }
 
     $query = "
@@ -95,7 +110,7 @@ try {
         WHERE
             HSP_TRAT_INT = 'I'
             AND HSP_STAT = 'E'
-        ";
+    ";
 
     if ($hoursFilter > 0) {
         $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE());"; 
@@ -107,6 +122,7 @@ try {
 
     if (count($result) > 0) {
         $groupedPatients = [];
+        $previousStates = []; 
         
         foreach ($result as $row) {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
@@ -129,7 +145,13 @@ try {
                     'IDADE' => $idade,
                     'TIPO' => $tipo 
                 ];
+            } else {
+                if ($previousStates[$row['REGISTRO']] === 'ADMISSAO' && $tipo === 'ALTA') {
+                    echo "<script>showNotification('$patientName');</script>"; 
+                }
             }
+            $previousStates[$row['REGISTRO']] = $tipo;
+
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
                 if (!in_array($dietName, $groupedPatients[$patientName]['DIETAS'])) {
@@ -147,26 +169,42 @@ try {
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
-
-        <form method="POST" action="" class="text-end">
-            <button type="submit" class="btn btn-primary mb-3 btn-sm" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-            <button type="submit" class="btn btn-secondary mb-3 btn-sm" id="filterLast12Hours" name="filterLast12Hours">Filtrar Últimas 12 Horas</button>
-            <button type="submit" class="btn btn-success mb-3 btn-sm" id="filterLast24Hours" name="filterLast24Hours">Filtrar Últimas 24 Horas</button> <!-- Botão para filtrar as últimas 24 horas -->
-        </form>
-
-        <div class="d-flex justify-content-around mb-3">
-            <div>
+        <div class="container" style="text-align: right;">
+            <form method="POST" action="" style="margin: 6px; display: inline-block;">
+                <div class="d-flex align-items-center">
+                    <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: auto;">
+                        <option value="">Selecione um horário</option>
+                        <option value="last6hours">Últimas 6 Horas</option>
+                        <option value="last12hours">Últimas 12 Horas</option>
+                        <option value="last24hours">Últimas 24 Horas</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2">Aplicar Filtro</button>
+                </div>
+            </form>
+        </div>
+        <form method="POST" action="" class="text-start" style="margin: 6px">
+            <div class="button-style_total">
                 <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
             </div>
-            <div style="color: #001f3f;">
+            <div class="button-style_admissao">
                 <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
             </div>
-            <div style="color: green;">
+            <div class="button-style_altas">
                 <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
             </div>
-        </div>
-
-
+        </form>
+        <script>
+            function showNotification(pacienteNome) {
+                Toastify({
+                    text: `Paciente ${pacienteNome} mudou de estado: de ADMISSÃO para ALTA.`,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: 'right',
+                    backgroundColor: "#4CAF50",
+                }).showToast();
+            }
+        </script>
         <div class="mb-3">
             <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
         </div>
@@ -184,7 +222,7 @@ try {
                     <th>Dieta</th>
                     <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th id="tipo-header" style="min-width: 100px;">Tipo</th>
+                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
                     <th>Acompanhante</th>
                 </tr>
             </thead>
@@ -199,7 +237,7 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
                     <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
-                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #001f3f; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: green; color: white;' : ''); ?>">
+                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
                         <?= htmlspecialchars($patient['TIPO']); ?>
                     </td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
@@ -207,12 +245,7 @@ try {
                 <?php } ?>
             </tbody>
         </table>
-
-
-
-
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-            
             <div class="pagination-container" id="pagination-container">
                 <button class="btn btn-success" id="prev-set" disabled><i class="fas fa-chevron-left"></i></button>
                 <div id="page-numbers" class="mx-2"></div>
@@ -221,13 +254,15 @@ try {
         </div>
     </div>
 </div>
+
 <script>
     setInterval(updateCurrentTime, 1000);
     updateCurrentTime();
     setInterval(() => {
         location.reload();
-    }, 300000); 
+    }, 60000); 
 </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="teste.js"></script>
 </body>
