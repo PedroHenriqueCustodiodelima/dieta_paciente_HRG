@@ -1,0 +1,60 @@
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+}
+
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: center; 
+    margin: 0; 
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px; 
+    font-family: Arial, sans-serif; /* Definindo a fonte como Arial */
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px; 
+    text-align: left; 
+}
+
+th {
+    background-color: green;
+    color: white; 
+    font-weight: bold; 
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2; 
+}
+
+tr:hover {
+    background-color: #d9edf7; 
+}
+
+td {
+    font-size: 14px; 
+}
+
+button {
+    background-color: green; 
+    color: white; 
+    border: none; 
+    padding: 5px 10px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+}
+
+button:hover {
+    background-color: darkgreen; 
+}
