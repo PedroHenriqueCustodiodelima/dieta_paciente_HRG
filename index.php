@@ -7,8 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="teste.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 </head>
 <body>
+
 
 <?php 
 include 'conexao.php'; 
@@ -19,70 +23,116 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
+    $hoursFilter = 12; 
+
+    if (isset($_POST['filter'])) {
+        switch ($_POST['filter']) {
+            case 'last6hours':
+                $hoursFilter = 6;
+                break;
+            case 'last12hours':
+                $hoursFilter = 12;
+                break;
+            case 'last24hours':
+                $hoursFilter = 24;
+                break;
+            default:
+                $hoursFilter = 24; 
+                break;
+        }
+    }
+
     $query = "
-    SELECT 
-        HSP.HSP_NUM AS 'IH', 
-        HSP.HSP_PAC AS 'REGISTRO', 
-        PAC.PAC_NOME AS 'PACIENTE', 
-        CNV.CNV_NOME AS 'CONVENIO', 
-        LOC.LOC_NOME AS 'LEITO', 
-        PSC.PSC_DHINI AS 'PRESCRICAO', 
-        ISNULL(ADP.ADP_NOME, '') AS 'DIETA', 
-        HSP.HSP_DTHRE AS 'ADMISSÃO', 
-        CASE 
+        SELECT 
+        'ADMISSAO' AS TIPO,
+        HSP.HSP_NUM AS 'IH',
+        HSP.HSP_DTHRE AS 'DATA_EVENTO',
+        HSP.HSP_PAC AS 'REGISTRO',
+        PAC.PAC_NOME AS 'PACIENTE',
+        CASE
             WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
                 THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
             WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
                 THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
-        END AS 'IDADE', 
-        HSP.HSP_DTHRA AS 'HSP_DTHRA' 
-    FROM 
-        HSP 
-    INNER JOIN LOC ON HSP_LOC = LOC_COD 
-    INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC 
-    INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV 
-    LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D' 
-    LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D' 
-    WHERE 
-        HSP_TRAT_INT = 'I' 
-        AND HSP_STAT = 'A' 
-        AND PSC.PSC_STAT <> 'S' 
-";
+        END AS 'IDADE',
+        CNV.CNV_NOME AS 'CONVENIO',
+        RTRIM(STR.STR_NOME) AS 'UNIDADE',
+        LOC.LOC_NOME AS 'LEITO',
+        ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
+        ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
+        DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
+    FROM
+        HSP
+    INNER JOIN LOC ON HSP_LOC = LOC_COD
+    INNER JOIN STR ON STR_COD = LOC_STR
+    INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+    INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+    LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
+    LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
+    WHERE
+        HSP_TRAT_INT = 'I'
+        AND HSP_STAT = 'A'
+        AND PSC.PSC_STAT <> 'S'
+    ";
 
-    if (isset($_POST['filterLast6Hours'])) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -6, GETDATE())";
+    if ($hoursFilter > 0) {
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
+    $query .= " 
+        UNION ALL
 
-    // Novo filtro para as últimas 12 horas
-    if (isset($_POST['filterLast12Hours'])) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -12, GETDATE())";
+        SELECT 
+            'ALTA' AS TIPO,
+            HSP.HSP_NUM AS 'IH',
+            HSP.HSP_DTHRA AS 'DATA_EVENTO',
+            HSP.HSP_PAC AS 'REGISTRO',
+            PAC.PAC_NOME AS 'PACIENTE',
+            CASE
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
+                    THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
+                    THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
+            END AS 'IDADE',
+            CNV.CNV_NOME AS 'CONVENIO',
+            RTRIM(STR.STR_NOME) AS 'UNIDADE',
+            LOC.LOC_NOME AS 'LEITO',
+            ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
+            ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
+            DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
+        FROM
+            HSP
+        INNER JOIN LOC ON HSP_LOC = LOC_COD
+        INNER JOIN STR ON STR_COD = LOC_STR
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
+        WHERE
+            HSP_TRAT_INT = 'I'
+            AND HSP_STAT = 'E'
+    ";
+
+    if ($hoursFilter > 0) {
+        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE());"; 
+    } else {
+        $query .= ";"; 
     }
-
-    $query .= " AND PSC.PSC_DHINI = (
-        SELECT MAX(PSCMAX.PSC_DHINI) 
-        FROM PSC PSCMAX 
-        WHERE PSCMAX.PSC_PAC = PSC.PSC_PAC 
-        AND PSCMAX.PSC_HSP = PSC.PSC_HSP 
-        AND PSCMAX.PSC_TIP = 'D' 
-        AND PSCMAX.PSC_STAT = 'A'
-    ) ORDER BY PAC.PAC_NOME, LOC.LOC_NOME;";
 
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($result) > 0) {
         $groupedPatients = [];
+        $previousStates = []; 
         
         foreach ($result as $row) {
-            // Capitalizar o nome completo do paciente
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
-            $prescricao = date('d/m/Y', strtotime($row['PRESCRICAO']));
-            $admissao = date('d/m/Y H:i', strtotime($row['ADMISSÃO']));
+            $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
+            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
             $idade = $row['IDADE'];
-            $alta = !empty($row['HSP_DTHRA']) ? 'ALTA' : 'ADMISSÃO';
+            $tipo = $row['TIPO']; 
 
-            // Verificar se já existe um paciente com esse nome completo
             if (!isset($groupedPatients[$patientName])) {
                 $groupedPatients[$patientName] = [
                     'REGISTRO' => $row['REGISTRO'],
@@ -90,24 +140,25 @@ try {
                     'CONVENIO' => $convenio,
                     'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
-                    'DIETAS' => [], // Mantenha como um array vazio
-                    'ADMISSÃO' => $admissao,
+                    'DIETAS' => [], 
+                    'ADMISSÃO' => $admissao, 
                     'IDADE' => $idade,
-                    'ALTA' => $alta
+                    'TIPO' => $tipo 
                 ];
+            } else {
+                if ($previousStates[$row['REGISTRO']] === 'ADMISSAO' && $tipo === 'ALTA') {
+                    echo "<script>showNotification('$patientName');</script>"; 
+                }
             }
-            
-            // Adicionar dieta, se disponível
+            $previousStates[$row['REGISTRO']] = $tipo;
+
             if (!empty($row['DIETA'])) {
-                // Verificar se a dieta já está adicionada
                 $dietName = capitalizeFirstLetters($row['DIETA']);
                 if (!in_array($dietName, $groupedPatients[$patientName]['DIETAS'])) {
                     $groupedPatients[$patientName]['DIETAS'][] = $dietName;
                 }
             }
         }
-
-        // Reorganizar o array para a tabela
         $groupedPatients = array_values($groupedPatients);
     }
 
@@ -115,59 +166,68 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
-
-
-
-
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12">
-
-        <form method="POST" action="">
-            <button type="submit" class="btn btn-primary mb-3" id="filterLast6Hours" name="filterLast6Hours">Filtrar Últimas 6 Horas</button>
-            <button type="submit" class="btn btn-secondary mb-3" id="filterLast12Hours" name="filterLast12Hours">Filtrar Últimas 12 Horas</button>
+        <div class="container" style="text-align: right;">
+            <form method="POST" action="" style="margin: 6px; display: inline-block;">
+                <div class="d-flex align-items-center">
+                    <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: auto;">
+                        <option value="">Selecione um horário</option>
+                        <option value="last6hours">Últimas 6 Horas</option>
+                        <option value="last12hours">Últimas 12 Horas</option>
+                        <option value="last24hours">Últimas 24 Horas</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2">Aplicar Filtro</button>
+                </div>
+            </form>
+        </div>
+        <form method="POST" action="" class="text-start" style="margin: 6px">
+            <div class="button-style_total">
+                <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
+            </div>
+            <div class="button-style_admissao">
+                <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
+            </div>
+            <div class="button-style_altas">
+                <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
+            </div>
         </form>
+        <script>
+            function showNotification(pacienteNome) {
+                Toastify({
+                    text: `Paciente ${pacienteNome} mudou de estado: de ADMISSÃO para ALTA.`,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: 'right',
+                    backgroundColor: "#4CAF50",
+                }).showToast();
+            }
+        </script>
         <div class="mb-3">
             <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
         </div>
         <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
             <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
         </div>
-
         <table class="table table-striped table-bordered table-hover">
             <thead style="background-color: green; color:white;">
                 <tr>
                     <th>Registro</th>
-                    <th id="paciente-header" style="cursor: pointer;">
-                        Paciente
-                        <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i>
-                    </th>
-                    <th id="convenio-header" style="cursor: pointer;">
-                        Convênio
-                        <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i>
-                    </th>
+                    <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Leito</th>
-                    <th id="prescricao-header" style="min-width: 150px;">
-                        Prescrição 
-                        <i id="sort-icon" class="fa-solid fa-caret-up"></i> 
-                    </th>
+                    <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Dieta</th>
-                    <th id="admissao-header" style="min-width: 150px;">
-                        Data
-                        <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i>
-                    </th>
-                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">
-                        Idade
-                        <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i>
-                    </th>
-                    <th id="alta-header" style="min-width: 150px;">ALTA</th> 
+                    <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
                     <th>Acompanhante</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <?php 
-                foreach ($groupedPatients as $patient) { 
-                ?>
+                <?php foreach ($groupedPatients as $patient) { ?>
                 <tr class="trdados">
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
@@ -175,37 +235,33 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO']); ?></td>
-
-                    <td class="text-center align-middle ">
-    <?= htmlspecialchars($patient['IDADE']); ?>
-</td>
-
-
-
-
-                    <td class="text-centro align-middle col-1"><?= htmlspecialchars($patient['ALTA']); ?></td> <!-- Coluna de alta -->
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td> <!-- Se você tiver a coluna de acompanhante, adicione aqui -->
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
+                    <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
+                        <?= htmlspecialchars($patient['TIPO']); ?>
+                    </td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
                 </tr>
-                <?php 
-                } 
-                ?>
+                <?php } ?>
             </tbody>
         </table>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-                <div class="pagination-container" id="pagination-container">
-                    <button class="btn btn-success" id="prev-set" disabled>
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div id="page-numbers" class="mx-2"></div>
-                    <button class="btn btn-success" id="next-set">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+            <div class="pagination-container" id="pagination-container">
+                <button class="btn btn-success" id="prev-set" disabled><i class="fas fa-chevron-left"></i></button>
+                <div id="page-numbers" class="mx-2"></div>
+                <button class="btn btn-success" id="next-set"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime();
+    setInterval(() => {
+        location.reload();
+    }, 60000); 
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="teste.js"></script>
