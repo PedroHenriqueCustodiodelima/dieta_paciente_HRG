@@ -69,22 +69,26 @@ function updateTableAndPagination(rows) {
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
     console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
-    currentPage++;
-    if (currentPage > totalPages) {
-        currentPage = 1; 
+
+    // Verifique se não está na última página antes de incrementar
+    if (currentPage < totalPages) {
+        currentPage++;
+    } else {
+        currentPage = 1; // Se estiver na última, vai para a primeira
     }
-    
+
     console.log(`Página atual após: ${currentPage}`);
-
-
     updateTableAndPagination(filteredRows);
-    updateProgressBar(); 
+    updateProgressBar();
 }
 
 function startAutoPagination() {
+    currentPage = 1; // Adiciona a garantia de que a página começa em 1
+    updateTableAndPagination(filteredRows); // Atualiza a tabela para a primeira página
     updateProgressBar(); 
     autoPageInterval = setInterval(nextPage, intervalTime); 
 }
+
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
