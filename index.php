@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabela de Pacientes com Paginação Dinâmica</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="teste.css">
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -23,7 +23,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $hoursFilter = 12; 
+    $hoursFilter = 6; 
 
     if (isset($_POST['filter'])) {
         switch ($_POST['filter']) {
@@ -78,7 +78,8 @@ try {
     if ($hoursFilter > 0) {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
-    $query .= " 
+
+    $query .= "
         UNION ALL
 
         SELECT 
@@ -113,15 +114,17 @@ try {
     ";
 
     if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE());"; 
-    } else {
-        $query .= ";"; 
+        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
+
+    $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
+    
+    $groupedPatients = [];
+
     if (count($result) > 0) {
-        $groupedPatients = [];
         $previousStates = []; 
         
         foreach ($result as $row) {
@@ -159,6 +162,7 @@ try {
                 }
             }
         }
+        
         $groupedPatients = array_values($groupedPatients);
     }
 
@@ -166,33 +170,35 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 <div class="container-fluid mt-5">
-    <div class="row justify-content-center">
+    <div class="row justify-content-between">
         <div class="col-12">
-        <div class="container" style="text-align: right;">
-            <form method="POST" action="" style="margin: 6px; display: inline-block;">
-                <div class="d-flex align-items-center">
-                    <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: auto;">
-                        <option value="">Selecione um horário</option>
-                        <option value="last6hours">Últimas 6 Horas</option>
-                        <option value="last12hours">Últimas 12 Horas</option>
-                        <option value="last24hours">Últimas 24 Horas</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2">Aplicar Filtro</button>
-                </div>
-            </form>
-        </div>
-        <form method="POST" action="" class="text-start" style="margin: 6px">
-            <div class="button-style_total">
-                <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
+            <div class="d-flex justify-content-between align-items-center w-100" style="padding: 0;">
+                <form method="POST" action="" style="margin: 0; display: inline-block;">
+                    <div class="d-flex align-items-center">
+                        <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: 300px; height: 35px; margin-top: 20px;">
+                            <option value="">Selecione um horário</option>
+                            <option value="last6hours">Últimas 6 Horas</option>
+                            <option value="last12hours">Últimas 12 Horas</option>
+                            <option value="last24hours">Últimas 24 Horas</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2" style="margin-top: 20px;">Aplicar Filtro</button>
+                    </div>
+                </form>
+                
+                <form method="POST" action="" class="text-start" style="margin: 0;">
+                    <div class="button-style_total">
+                        <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
+                    </div>
+                    <div class="button-style_admissao">
+                        <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
+                    </div>
+                    <div class="button-style_altas">
+                        <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
+                    </div>
+                </form>
             </div>
-            <div class="button-style_admissao">
-                <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
-            </div>
-            <div class="button-style_altas">
-                <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
-            </div>
-        </form>
         <script>
             function showNotification(pacienteNome) {
                 Toastify({
@@ -222,7 +228,7 @@ try {
                     <th>Dieta</th>
                     <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th id="tipo-header" style="min-width: 100px;">Situação</th>
+                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
                     <th>Acompanhante</th>
                 </tr>
             </thead>
@@ -264,6 +270,6 @@ try {
 </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="teste.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

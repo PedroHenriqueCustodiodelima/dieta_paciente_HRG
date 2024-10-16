@@ -205,22 +205,16 @@ function convertToDateTime(dateStr) {
 const admissaoHeader = document.getElementById('admissao-header');
 const sortAdmissaoIcon = document.getElementById('sort-admissao-icon');
 let isAdmissaoAsc = false; 
+
 admissaoHeader.onclick = function() {
     filteredRows.sort((a, b) => {
         const dateTimeA = convertToDateTime(a.cells[6].textContent.trim()); 
-        const dateTimeB = convertToDateTime(b.cells[6].textContent.trim()); 
-        const ageInDaysA = Math.floor((new Date() - dateTimeA) / (1000 * 60 * 60 * 24));
-        const ageInDaysB = Math.floor((new Date() - dateTimeB) / (1000 * 60 * 60 * 24));
-        if (ageInDaysA < 365 && ageInDaysB < 365) {
-            return isAdmissaoAsc ? ageInDaysA - ageInDaysB : ageInDaysB - ageInDaysA;
-        } else if (ageInDaysA < 365) {
-            return isAdmissaoAsc ? -1 : 1;
-        } else if (ageInDaysB < 365) {
-            return isAdmissaoAsc ? 1 : -1;
-        }
-        return isAdmissaoAsc ? (ageInDaysA - ageInDaysB) : (ageInDaysB - ageInDaysA);
+        const dateTimeB = convertToDateTime(b.cells[6].textContent.trim());
+
+        return isAdmissaoAsc ? dateTimeA - dateTimeB : dateTimeB - dateTimeA;
     });
 
+ 
     isAdmissaoAsc = !isAdmissaoAsc; 
     sortAdmissaoIcon.className = isAdmissaoAsc ? 'fa-solid fa-caret-up sort-icon rotate-up' : 'fa-solid fa-caret-down sort-icon rotate-down';
     sortAdmissaoIcon.style.display = 'inline';

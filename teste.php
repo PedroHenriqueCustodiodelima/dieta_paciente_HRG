@@ -23,7 +23,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $hoursFilter = 12; 
+    $hoursFilter = 6; 
 
     if (isset($_POST['filter'])) {
         switch ($_POST['filter']) {
@@ -78,7 +78,8 @@ try {
     if ($hoursFilter > 0) {
         $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
-    $query .= " 
+
+    $query .= "
         UNION ALL
 
         SELECT 
@@ -113,15 +114,17 @@ try {
     ";
 
     if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE());"; 
-    } else {
-        $query .= ";"; 
+        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
     }
+
+    $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
+    
+    $groupedPatients = [];
+
     if (count($result) > 0) {
-        $groupedPatients = [];
         $previousStates = []; 
         
         foreach ($result as $row) {
@@ -159,6 +162,7 @@ try {
                 }
             }
         }
+        
         $groupedPatients = array_values($groupedPatients);
     }
 
@@ -166,33 +170,35 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 <div class="container-fluid mt-5">
-    <div class="row justify-content-center">
+    <div class="row justify-content-between">
         <div class="col-12">
-        <div class="container" style="text-align: right;">
-            <form method="POST" action="" style="margin: 6px; display: inline-block;">
-                <div class="d-flex align-items-center">
-                    <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: auto;">
-                        <option value="">Selecione um horário</option>
-                        <option value="last6hours">Últimas 6 Horas</option>
-                        <option value="last12hours">Últimas 12 Horas</option>
-                        <option value="last24hours">Últimas 24 Horas</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2">Aplicar Filtro</button>
-                </div>
-            </form>
-        </div>
-        <form method="POST" action="" class="text-start" style="margin: 6px">
-            <div class="button-style_total">
-                <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
+            <div class="d-flex justify-content-between align-items-center w-100" style="padding: 0;">
+                <form method="POST" action="" style="margin: 0; display: inline-block;">
+                    <div class="d-flex align-items-center">
+                        <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: 300px; height: 35px; margin-top: 20px;">
+                            <option value="">Selecione um horário</option>
+                            <option value="last6hours">Últimas 6 Horas</option>
+                            <option value="last12hours">Últimas 12 Horas</option>
+                            <option value="last24hours">Últimas 24 Horas</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2" style="margin-top: 20px;">Aplicar Filtro</button>
+                    </div>
+                </form>
+                
+                <form method="POST" action="" class="text-start" style="margin: 0;">
+                    <div class="button-style_total">
+                        <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
+                    </div>
+                    <div class="button-style_admissao">
+                        <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
+                    </div>
+                    <div class="button-style_altas">
+                        <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
+                    </div>
+                </form>
             </div>
-            <div class="button-style_admissao">
-                <strong>Total de Admissões:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ADMISSAO')); ?>
-            </div>
-            <div class="button-style_altas">
-                <strong>Total de Altas:</strong> <?= count(array_filter($groupedPatients, fn($p) => $p['TIPO'] === 'ALTA')); ?>
-            </div>
-        </form>
         <script>
             function showNotification(pacienteNome) {
                 Toastify({
