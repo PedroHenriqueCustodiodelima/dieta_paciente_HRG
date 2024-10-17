@@ -83,7 +83,7 @@ function nextPage() {
     if (currentPage < totalPages) {
         currentPage++;
     } else {
-        currentPage = 1; // Se estiver na última, vai para a primeira
+        currentPage = 1; // Se estiver na última, volta para a primeira
     }
 
     console.log(`Página atual após: ${currentPage}`);
@@ -109,16 +109,17 @@ function updateProgressBar() {
         if (!startTime) startTime = timestamp; 
         const elapsed = timestamp - startTime; 
         const progress = Math.min((elapsed / duration) * 100 + currentWidth, 100); // Adiciona a largura atual
-
+    
         progressBar.style.width = progress + '%'; 
-
+    
         if (progress < 100) {
             progressInterval = requestAnimationFrame(animateProgress); 
         } else {
             resetProgressBar(); // Reinicia a barra quando atingir 100%
-            startAutoPagination(); // Reinicia a paginação automática
+            nextPage(); // Avança para a próxima página quando atinge 100%
         }
     }
+    
 
     progressInterval = requestAnimationFrame(animateProgress); 
 }
@@ -143,7 +144,6 @@ controlButton.onclick = () => {
         startAutoPagination(); 
         controlButton.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
     }
-    // Remover a alternância de isPlaying aqui
 };
 
 updateTableAndPagination(filteredRows);
