@@ -133,6 +133,7 @@ try {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
+            $unidade = capitalizeFirstLetters($row['UNIDADE']); // Adicionando a unidade aqui
             $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
             $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
             $idade = $row['IDADE'];
@@ -143,6 +144,7 @@ try {
                     'REGISTRO' => $row['REGISTRO'],
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
+                    'UNIDADE' => $unidade, // Adicionando unidade aqui
                     'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
                     'DIETAS' => [], 
@@ -246,7 +248,7 @@ try {
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
                     <td class="text-start align-middle col-7"><?= htmlspecialchars(implode(', ', $patient['OBS'])); ?></td>
