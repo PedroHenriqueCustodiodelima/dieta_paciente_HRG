@@ -14,6 +14,22 @@ const intervalTime = 40000;
 let autoPageInterval; 
 let progressInterval; 
 
+function limitarTexto(texto, limite) {
+    if (texto.length > limite) {
+        return texto.substring(0, limite) + '... <a href="#" class="ver-mais" data-fulltext="' + texto + '">Ver mais</a>';
+    }
+    return texto;
+}
+
+function limitarTextoEmObservacoes() {
+    const observacoes = document.querySelectorAll('.observacao-limited');
+
+    observacoes.forEach(obs => {
+        const textoOriginal = obs.getAttribute('data-fulltext') || obs.innerText;
+        obs.innerHTML = limitarTexto(textoOriginal, 50); // limite de 50 caracteres
+    });
+}
+
 function showPage(page, rows) {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage; 
@@ -23,8 +39,13 @@ function showPage(page, rows) {
     if (rowsToDisplay.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="X">Sem pacientes internados</td></tr>'; 
     } else {
-        rowsToDisplay.forEach(row => tableBody.appendChild(row));
+        rowsToDisplay.forEach(row => {
+            tableBody.appendChild(row);
+        });
     }
+
+    
+    limitarTextoEmObservacoes();
 }
 
 function updatePagination(rows) {
@@ -70,11 +91,10 @@ function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
     console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
 
-    // Verifique se não está na última página antes de incrementar
     if (currentPage < totalPages) {
         currentPage++;
     } else {
-        currentPage = 1; // Se estiver na última, vai para a primeira
+        currentPage = 1; 
     }
 
     console.log(`Página atual após: ${currentPage}`);
@@ -83,12 +103,11 @@ function nextPage() {
 }
 
 function startAutoPagination() {
-    currentPage = 1; // Adiciona a garantia de que a página começa em 1
-    updateTableAndPagination(filteredRows); // Atualiza a tabela para a primeira página
+    currentPage = 1; 
+    updateTableAndPagination(filteredRows); 
     updateProgressBar(); 
     autoPageInterval = setInterval(nextPage, intervalTime); 
 }
-
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
@@ -115,8 +134,80 @@ function stopAutoPagination() {
     clearInterval(autoPageInterval);
     clearInterval(progressInterval);
 }
-showPage(currentPage, filteredRows);
-startAutoPagination(); 
+
+
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none'; 
+    }
+}
+
+document.addEventListener("click", function(event) {
+    if (event.target.classList.contains("ver-mais")) {
+        event.preventDefault(); 
+        const fullText = event.target.getAttribute("data-fulltext");
+        
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerText = fullText; 
+        openModal('myModal'); 
+    }
+});
+
+window.addEventListener("click", function(event) {
+    const modal = document.getElementById('myModal');
+    if (event.target === modal) { 
+        closeModal('myModal');
+    }
+});
+
+document.addEventListener("click", function(event) {
+    if (event.target.classList.contains("close-modal")) { 
+        closeModal('myModal');
+    }
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    tableRows.forEach(row => {
+        const obsElement = row.querySelector('.observacao-limited');
+        if (obsElement) {
+            const textoOriginal = obsElement.innerText;
+            obsElement.setAttribute('data-fulltext', textoOriginal);
+        }
+    });
+
+    showPage(currentPage, filteredRows); 
+    startAutoPagination(); 
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -313,3 +404,4 @@ document.getElementById('horas-header').onclick = function() {
     currentPage = 1; 
     updatePagination(filteredRows); 
 };
+
