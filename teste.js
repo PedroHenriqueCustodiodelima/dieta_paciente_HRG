@@ -14,6 +14,9 @@ const intervalTime = 10000;
 let autoPageInterval; 
 let progressInterval; 
 
+const controlButton = document.getElementById('control-button');
+let isPlaying = false;
+
 function showPage(page, rows) {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage; 
@@ -70,7 +73,6 @@ function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
     console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
 
-    // Verifique se não está na última página antes de incrementar
     if (currentPage < totalPages) {
         currentPage++;
     } else {
@@ -83,40 +85,94 @@ function nextPage() {
 }
 
 function startAutoPagination() {
-    currentPage = 1; // Adiciona a garantia de que a página começa em 1
-    updateTableAndPagination(filteredRows); // Atualiza a tabela para a primeira página
-    updateProgressBar(); 
-    autoPageInterval = setInterval(nextPage, intervalTime); 
+    if (!isPlaying) { // Verifique se não está já jogando
+        updateTableAndPagination(filteredRows); // Atualiza a tabela para a página atual
+        updateProgressBar(); 
+        autoPageInterval = setInterval(nextPage, intervalTime); 
+    }
 }
-
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = '0%'; 
+    let currentWidth = parseFloat(progressBar.style.width) || 0; // Captura a largura atual
+    progressBar.style.width = currentWidth + '%'; 
     let startTime = null; 
-    const duration = intervalTime; 
+    const duration = intervalTime - (currentWidth / 100 * intervalTime); // Tempo restante
 
     function animateProgress(timestamp) {
         if (!startTime) startTime = timestamp; 
         const elapsed = timestamp - startTime; 
-        const progress = Math.min((elapsed / duration) * 100, 100); 
+        const progress = Math.min((elapsed / duration) * 100 + currentWidth, 100); // Adiciona a largura atual
 
         progressBar.style.width = progress + '%'; 
 
         if (progress < 100) {
-            requestAnimationFrame(animateProgress); 
+            progressInterval = requestAnimationFrame(animateProgress); 
         }
     }
 
-    requestAnimationFrame(animateProgress); 
+    progressInterval = requestAnimationFrame(animateProgress); 
 }
 
 function stopAutoPagination() {
     clearInterval(autoPageInterval);
-    clearInterval(progressInterval);
+    if (progressInterval) {
+        cancelAnimationFrame(progressInterval); // Para a animação da barra de progresso
+    }
+    const progressBar = document.getElementById('progress-bar');
+    const currentWidth = parseFloat(progressBar.style.width); // Obtém a largura atual da barra
+    progressBar.style.width = currentWidth + '%'; // Mantém a largura atual
 }
-showPage(currentPage, filteredRows);
-startAutoPagination(); 
+
+// Controlar a funcionalidade de play e pause
+controlButton.onclick = () => {
+    if (isPlaying) {
+        stopAutoPagination(); // Para a paginação automática
+        controlButton.innerHTML = '<i class="fa-solid fa-play"></i>'; // Muda para ícone de play
+    } else {
+        startAutoPagination(); 
+        controlButton.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
+    }
+    isPlaying = !isPlaying; 
+};
+
+updateTableAndPagination(filteredRows);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
