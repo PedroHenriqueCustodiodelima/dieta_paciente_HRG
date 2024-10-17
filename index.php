@@ -133,46 +133,56 @@ try {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
-            $unidade = capitalizeFirstLetters($row['UNIDADE']); // Adicionando a unidade aqui
+            $unidade = capitalizeFirstLetters($row['UNIDADE']);
             $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
+            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
             $idade = $row['IDADE'];
-            $tipo = $row['TIPO']; 
-
-            if (!isset($groupedPatients[$patientName])) {
-                $groupedPatients[$patientName] = [
-                    'REGISTRO' => $row['REGISTRO'],
+            $tipo = $row['TIPO'];
+            $registro = $row['REGISTRO']; // Definindo o registro para facilitar o acesso
+        
+            // Checar se o paciente já está na lista agrupada usando o REGISTRO
+            if (!isset($groupedPatients[$registro])) {
+                $groupedPatients[$registro] = [
+                    'REGISTRO' => $registro,
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
-                    'UNIDADE' => $unidade, // Adicionando unidade aqui
+                    'UNIDADE' => $unidade,
                     'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
-                    'DIETAS' => [], 
-                    'OBS' => [], 
-                    'ADMISSÃO' => $admissao, 
+                    'DIETAS' => [],
+                    'OBS' => [],
+                    'ADMISSÃO' => $admissao,
                     'IDADE' => $idade,
-                    'TIPO' => $tipo 
+                    'TIPO' => $tipo
                 ];
             } else {
-                if ($previousStates[$row['REGISTRO']] === 'ADMISSAO' && $tipo === 'ALTA') {
-                    echo "<script>showNotification('$patientName');</script>"; 
+                // Notificação para mudanças de estado
+                if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
+                    echo "<script>showNotification('$patientName');</script>";
                 }
             }
-            $previousStates[$row['REGISTRO']] = $tipo;
-
+            $previousStates[$registro] = $tipo;
+        
+            // Adicionar Dieta, se houver, garantindo que não haja duplicatas
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
-                if (!in_array($dietName, $groupedPatients[$patientName]['DIETAS'])) {
-                    $groupedPatients[$patientName]['DIETAS'][] = $dietName;
+                if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
+                    $groupedPatients[$registro]['DIETAS'][] = $dietName;
                 }
             }
+            
+            // Adicionar Observação, se houver, garantindo que não haja duplicatas
             if (!empty($row['OBS'])) {
-                $groupedPatients[$patientName]['OBS'][] = $row['OBS'];
+                $obsText = capitalizeFirstLetters($row['OBS']);
+                if (!in_array($obsText, $groupedPatients[$registro]['OBS'])) {
+                    $groupedPatients[$registro]['OBS'][] = $obsText;
+                }
             }
-        
         }
         
+        // Transformar o array associativo em um array indexado
         $groupedPatients = array_values($groupedPatients);
+        
     }
 
 } catch (Exception $e) {
@@ -226,43 +236,47 @@ try {
         <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
             <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
         </div>
-        <table class="table table-striped table-bordered table-hover uppercase">
-    <thead style="background-color: green; color:white;">
-        <tr>
-            <th>Registro</th>
-            <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
-            <th style="min-width: 150px;">Leito e Unidade</th>
-            <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
-            <th>Dieta</th>
-            <th class="obs">Observação</th>
-            <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="tipo-header" style="min-width: 100px;">Alta</th>
-            <th>Acompanhante</th>
-        </tr>
-    </thead>
-    <tbody id="table-body">
-        <?php foreach ($groupedPatients as $patient) { ?>
-        <tr class="trdados">
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td>
-            <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-            <td class="text-start align-middle col-7 observacao-limited"><?= htmlspecialchars(implode(', ', $patient['OBS'])); ?></td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
-            <td id="idade" class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
-            <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
-                <?= htmlspecialchars($patient['TIPO']); ?>
-            </td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
-        </tr>
-        <?php } ?>
-    </tbody>
-</table>
+        <table class="table table-striped table-bordered table-hover">
+            <thead style="background-color: green; color:white;">
+                <tr>
+                    <th>Registro</th>
+                    <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th style="min-width: 150px;">Leito e Unidade</th>
+                    <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th>Dieta</th>
+                    <th class="obs">Observação</th>
+                    <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
+                    <th>Acompanhante</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <?php foreach ($groupedPatients as $patient) { ?>
+                <tr class="trdados">
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
+                    <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                    <td class="text-start align-middle col-7">
+    <?= !empty($patient['OBS']) ? htmlspecialchars(implode(', ', $patient['OBS'])) : 'Sem observações'; ?>
+</td>
 
+
+
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
+                    <td id="idade" class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
+                        <?= htmlspecialchars($patient['TIPO']); ?>
+                    </td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
             <div class="pagination-container" id="pagination-container">
                 <button class="btn btn-success" id="prev-set" disabled><i class="fas fa-chevron-left"></i></button>
@@ -272,14 +286,6 @@ try {
         </div>
     </div>
 </div>
-<div id="myModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal">x</span> 
-        <p id="modal-content"></p>
-    </div>
-</div>
-
-
 
 <script>
     setInterval(updateCurrentTime, 1000);
