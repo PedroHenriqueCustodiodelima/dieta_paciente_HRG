@@ -10,7 +10,7 @@ const prevSetBtn = document.getElementById('prev-set');
 const nextSetBtn = document.getElementById('next-set');
 const pageNumbersContainer = document.getElementById('page-numbers');
 
-const intervalTime = 10000; 
+const intervalTime = 50000; 
 let autoPageInterval; 
 let progressInterval; 
 
