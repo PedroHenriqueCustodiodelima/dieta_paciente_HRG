@@ -43,7 +43,7 @@ try {
     }
 
     $query = "
-        SELECT 
+      SELECT 
         'ADMISSAO' AS TIPO,
         HSP.HSP_NUM AS 'IH',
         HSP.HSP_DTHRE AS 'DATA_EVENTO',
@@ -60,6 +60,7 @@ try {
         LOC.LOC_NOME AS 'LEITO',
         ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
         ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
+		PSC.PSC_OBS AS 'OBS' ,
         DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
     FROM
         HSP
@@ -99,6 +100,7 @@ try {
             LOC.LOC_NOME AS 'LEITO',
             ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
+			PSC.PSC_OBS AS 'OBS' ,
             DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
         FROM
             HSP
@@ -144,6 +146,7 @@ try {
                     'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
                     'DIETAS' => [], 
+                    'OBS' => [], 
                     'ADMISSÃO' => $admissao, 
                     'IDADE' => $idade,
                     'TIPO' => $tipo 
@@ -161,6 +164,10 @@ try {
                     $groupedPatients[$patientName]['DIETAS'][] = $dietName;
                 }
             }
+            if (!empty($row['OBS'])) {
+                $groupedPatients[$patientName]['OBS'][] = $row['OBS'];
+            }
+        
         }
         
         $groupedPatients = array_values($groupedPatients);
@@ -226,6 +233,7 @@ try {
                     <th>Leito</th>
                     <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Dieta</th>
+                    <th class="obs">Observação</th>
                     <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="tipo-header" style="min-width: 100px;">Alta</th>
@@ -241,8 +249,9 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                    <td class="text-start align-middle col-7"><?= htmlspecialchars(implode(', ', $patient['OBS'])); ?></td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
-                    <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td id="idade" class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
                     <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
                         <?= htmlspecialchars($patient['TIPO']); ?>
                     </td>
