@@ -217,43 +217,53 @@ try {
         <div class="mb-3">
             <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
         </div>
+
         <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
             <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
         </div>
+        <div>
+            <button id="control-button" class="btn btn-success">
+                <i class="fa-solid fa-play"></i>
+            </button>
+        </div>
+
+
+
+
         <table class="table table-striped table-bordered table-hover">
-    <thead style="background-color: green; color:white;">
-        <tr>
-            <th>Registro</th>
-            <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
-            <th>Leito e Unidade</th> <!-- Coluna combinada -->
-            <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
-            <th>Dieta</th>
-            <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
-            <th id="tipo-header" style="min-width: 100px;">Alta</th>
-            <th>Acompanhante</th>
-        </tr>
-    </thead>
-    <tbody id="table-body">
-        <?php foreach ($groupedPatients as $patient) { ?>
-        <tr class="trdados">
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
-            <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-            <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
-            <td class="text-center align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td>
-            <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
-                <?= htmlspecialchars($patient['TIPO']); ?>
-            </td>
-            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
-        </tr>
-        <?php } ?>
-    </tbody>
-</table>
+            <thead style="background-color: green; color:white;">
+                <tr>
+                    <th>Registro</th>
+                    <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th>Leito e Unidade</th> <!-- Coluna combinada -->
+                    <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th>Dieta</th>
+                    <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
+                    <th>Acompanhante</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <?php foreach ($groupedPatients as $patient) { ?>
+                <tr class="trdados">
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
+                    <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+                    <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
+                    <td class="text-center align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td>
+                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
+                        <?= htmlspecialchars($patient['TIPO']); ?>
+                    </td>
+                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
 
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
             <div class="pagination-container" id="pagination-container">

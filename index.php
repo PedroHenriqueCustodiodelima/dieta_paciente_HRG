@@ -242,7 +242,7 @@ try {
                     <th>Registro</th>
                     <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th>Leito</th>
+                    <th style="min-width: 150px;">Leito e Unidade</th>
                     <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Dieta</th>
                     <th class="obs">Observação</th>
