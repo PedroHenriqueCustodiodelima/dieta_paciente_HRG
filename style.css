@@ -7,12 +7,18 @@
 }
 table {
     font-family: 'Arial', sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 300;
     line-height: 1.5;
     letter-spacing: 0.5px;
     text-transform: none;
 }
+.obs {
+    width: 80%; /* Ajuste a porcentagem conforme necessário */
+    word-wrap: break-word; /* Permite que o texto quebre em várias linhas, se necessário */
+    white-space: normal; /* Permite que o texto quebre, ao contrário de nowrap que mantém tudo em uma linha */
+}
+
 table {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -119,4 +125,7 @@ table th, table td {
     display: inline-block; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
     background-color: #23884D;
+}
+#idade td{
+    font-size:6px;
 }
