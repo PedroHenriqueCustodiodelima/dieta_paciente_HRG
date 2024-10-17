@@ -21,7 +21,7 @@ function showPage(page, rows) {
     tableBody.innerHTML = ''; 
     const rowsToDisplay = rows.slice(start, end); 
     if (rowsToDisplay.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="X">Nenhum dado para exibir</td></tr>'; 
+        tableBody.innerHTML = '<tr><td colspan="X">Sem pacientes internados</td></tr>'; 
     } else {
         rowsToDisplay.forEach(row => tableBody.appendChild(row));
     }
