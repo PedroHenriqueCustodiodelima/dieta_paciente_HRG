@@ -56,7 +56,7 @@ try {
                 THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
         END AS 'IDADE',
         CNV.CNV_NOME AS 'CONVENIO',
-        RTRIM(STR.STR_NOME) AS 'UNIDADE',
+        RTRIM(STR.STR_NOME) AS 'UNIDADE', -- Aqui foi adicionado o campo UNIDADE
         LOC.LOC_NOME AS 'LEITO',
         ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
         ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
@@ -95,7 +95,7 @@ try {
                     THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
             END AS 'IDADE',
             CNV.CNV_NOME AS 'CONVENIO',
-            RTRIM(STR.STR_NOME) AS 'UNIDADE',
+            RTRIM(STR.STR_NOME) AS 'UNIDADE', -- Aqui também foi adicionado o campo UNIDADE
             LOC.LOC_NOME AS 'LEITO',
             ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
@@ -131,6 +131,7 @@ try {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
+            $unidade = capitalizeFirstLetters($row['UNIDADE']); // Adicionando a unidade aqui
             $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
             $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
             $idade = $row['IDADE'];
@@ -142,6 +143,7 @@ try {
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
                     'LEITO' => $leito,
+                    'UNIDADE' => $unidade, // Adicionando unidade aqui
                     'PRESCRICAO' => $prescricao,
                     'DIETAS' => [], 
                     'ADMISSÃO' => $admissao, 
@@ -170,6 +172,7 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 
 <div class="container-fluid mt-5">
     <div class="row justify-content-between">
@@ -218,39 +221,40 @@ try {
             <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
         </div>
         <table class="table table-striped table-bordered table-hover">
-            <thead style="background-color: green; color:white;">
-                <tr>
-                    <th>Registro</th>
-                    <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th>Leito</th>
-                    <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th>Dieta</th>
-                    <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th id="tipo-header" style="min-width: 100px;">Alta</th>
-                    <th>Acompanhante</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <?php foreach ($groupedPatients as $patient) { ?>
-                <tr class="trdados">
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
-                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
-                    <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO']); ?></td>
-                    <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
-                    <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
-                    <td class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
-                    <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
-                        <?= htmlspecialchars($patient['TIPO']); ?>
-                    </td>
-                    <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
-                </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+    <thead style="background-color: green; color:white;">
+        <tr>
+            <th>Registro</th>
+            <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
+            <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
+            <th>Leito e Unidade</th> <!-- Coluna combinada -->
+            <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
+            <th>Dieta</th>
+            <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
+            <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
+            <th id="tipo-header" style="min-width: 100px;">Alta</th>
+            <th>Acompanhante</th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        <?php foreach ($groupedPatients as $patient) { ?>
+        <tr class="trdados">
+            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['REGISTRO']); ?></td>
+            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['PACIENTE']); ?></td>
+            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['CONVENIO']); ?></td>
+            <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
+            <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
+            <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
+            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
+            <td class="text-center align-middle"><?= htmlspecialchars($patient['IDADE']); ?></td>
+            <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
+                <?= htmlspecialchars($patient['TIPO']); ?>
+            </td>
+            <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ACOMPANHANTE'] ?? ''); ?></td>
+        </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
             <div class="pagination-container" id="pagination-container">
                 <button class="btn btn-success" id="prev-set" disabled><i class="fas fa-chevron-left"></i></button>
