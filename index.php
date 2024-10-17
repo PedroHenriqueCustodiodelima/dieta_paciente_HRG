@@ -133,56 +133,46 @@ try {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
-            $unidade = capitalizeFirstLetters($row['UNIDADE']);
+            $unidade = capitalizeFirstLetters($row['UNIDADE']); // Adicionando a unidade aqui
             $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
+            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
             $idade = $row['IDADE'];
-            $tipo = $row['TIPO'];
-            $registro = $row['REGISTRO']; // Definindo o registro para facilitar o acesso
-        
-            // Checar se o paciente já está na lista agrupada usando o REGISTRO
-            if (!isset($groupedPatients[$registro])) {
-                $groupedPatients[$registro] = [
-                    'REGISTRO' => $registro,
+            $tipo = $row['TIPO']; 
+
+            if (!isset($groupedPatients[$patientName])) {
+                $groupedPatients[$patientName] = [
+                    'REGISTRO' => $row['REGISTRO'],
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
-                    'UNIDADE' => $unidade,
+                    'UNIDADE' => $unidade, // Adicionando unidade aqui
                     'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
-                    'DIETAS' => [],
-                    'OBS' => [],
-                    'ADMISSÃO' => $admissao,
+                    'DIETAS' => [], 
+                    'OBS' => [], 
+                    'ADMISSÃO' => $admissao, 
                     'IDADE' => $idade,
-                    'TIPO' => $tipo
+                    'TIPO' => $tipo 
                 ];
             } else {
-                // Notificação para mudanças de estado
-                if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
-                    echo "<script>showNotification('$patientName');</script>";
+                if ($previousStates[$row['REGISTRO']] === 'ADMISSAO' && $tipo === 'ALTA') {
+                    echo "<script>showNotification('$patientName');</script>"; 
                 }
             }
-            $previousStates[$registro] = $tipo;
-        
-            // Adicionar Dieta, se houver, garantindo que não haja duplicatas
+            $previousStates[$row['REGISTRO']] = $tipo;
+
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
-                if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
-                    $groupedPatients[$registro]['DIETAS'][] = $dietName;
+                if (!in_array($dietName, $groupedPatients[$patientName]['DIETAS'])) {
+                    $groupedPatients[$patientName]['DIETAS'][] = $dietName;
                 }
             }
-            
-            // Adicionar Observação, se houver, garantindo que não haja duplicatas
             if (!empty($row['OBS'])) {
-                $obsText = capitalizeFirstLetters($row['OBS']);
-                if (!in_array($obsText, $groupedPatients[$registro]['OBS'])) {
-                    $groupedPatients[$registro]['OBS'][] = $obsText;
-                }
+                $groupedPatients[$patientName]['OBS'][] = $row['OBS'];
             }
+        
         }
         
-        // Transformar o array associativo em um array indexado
         $groupedPatients = array_values($groupedPatients);
-        
     }
 
 } catch (Exception $e) {
@@ -261,12 +251,7 @@ try {
                     <td class="text-start align-middle col-2"><?= htmlspecialchars($patient['LEITO'] . ', ' . $patient['UNIDADE']); ?></td> <!-- Leito e Unidade juntos -->
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
-                    <td class="text-start align-middle col-7">
-    <?= !empty($patient['OBS']) ? htmlspecialchars(implode(', ', $patient['OBS'])) : 'Sem observações'; ?>
-</td>
-
-
-
+                    <td class="text-start align-middle col-7"><?= htmlspecialchars(implode(', ', $patient['OBS'])); ?></td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
                     <td id="idade" class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
                     <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">
