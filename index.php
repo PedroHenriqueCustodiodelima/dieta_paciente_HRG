@@ -138,9 +138,9 @@ try {
             $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
-            $registro = $row['REGISTRO']; // Definindo o registro para facilitar o acesso
+            $registro = $row['REGISTRO']; 
         
-            // Checar se o paciente já está na lista agrupada usando o REGISTRO
+            
             if (!isset($groupedPatients[$registro])) {
                 $groupedPatients[$registro] = [
                     'REGISTRO' => $registro,
@@ -156,14 +156,14 @@ try {
                     'TIPO' => $tipo
                 ];
             } else {
-                // Notificação para mudanças de estado
+                
                 if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
                     echo "<script>showNotification('$patientName');</script>";
                 }
             }
             $previousStates[$registro] = $tipo;
         
-            // Adicionar Dieta, se houver, garantindo que não haja duplicatas
+           
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
                 if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
@@ -171,7 +171,7 @@ try {
                 }
             }
             
-            // Adicionar Observação, se houver, garantindo que não haja duplicatas
+            
             if (!empty($row['OBS'])) {
                 $obsText = capitalizeFirstLetters($row['OBS']);
                 if (!in_array($obsText, $groupedPatients[$registro]['OBS'])) {
@@ -180,7 +180,7 @@ try {
             }
         }
         
-        // Transformar o array associativo em um array indexado
+        
         $groupedPatients = array_values($groupedPatients);
         
     }
@@ -243,10 +243,10 @@ try {
                     <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
                     <th style="min-width: 150px;">Leito e Unidade</th>
-                    <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="prescricao-header" style="min-width: 100px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Dieta</th>
                     <th class="obs">Observação</th>
-                    <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
+                    <th id="admissao-header" style="min-width: 100px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="idade-header" style="cursor: pointer; min-width: 150px;">Idade <i id="sort-idade-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="tipo-header" style="min-width: 100px;">Alta</th>
                     <th>Acompanhante</th>
@@ -262,11 +262,8 @@ try {
                     <td class="text-center align-middle col-1"><?= htmlspecialchars($patient['PRESCRICAO']); ?></td>
                     <td class="text-start align-middle col-2"><?= htmlspecialchars(implode(', ', $patient['DIETAS'])); ?></td>
                     <td class="text-start align-middle col-7">
-    <?= !empty($patient['OBS']) ? htmlspecialchars(implode(', ', $patient['OBS'])) : 'Sem observações'; ?>
-</td>
-
-
-
+                    <?= !empty($patient['OBS']) ? htmlspecialchars(implode(', ', $patient['OBS'])) : 'Sem observações'; ?>
+                </td>
                     <td class="text-start align-middle col-1"><?= htmlspecialchars($patient['ADMISSÃO'] ?? ''); ?></td>
                     <td id="idade" class="text-center align-middle "><?= htmlspecialchars($patient['IDADE']); ?></td>
                     <td class="text-start align-middle col-1" style="<?= ($patient['TIPO'] === 'ADMISSAO') ? 'background-color: #234F88; color: white;' : (($patient['TIPO'] === 'ALTA') ? 'background-color: #23884D; color: white;' : ''); ?>">

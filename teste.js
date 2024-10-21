@@ -52,7 +52,7 @@ function updatePagination(rows) {
             clearInterval(autoPageInterval); 
             clearInterval(progressInterval); 
             updateTableAndPagination(filteredRows);
-            resetProgressBar(); // Resetar a barra de progresso ao mudar de página
+            resetProgressBar(); 
         };
 
         pageNumbersContainer.appendChild(pageNumber);
@@ -64,7 +64,7 @@ function updatePagination(rows) {
     showPage(currentPage, filteredRows);
 }
 
-// Atualize a função updateTableAndPagination se necessário
+
 function updateTableAndPagination(rows) {
     showPage(currentPage, rows);
     updatePagination(rows);
@@ -72,8 +72,8 @@ function updateTableAndPagination(rows) {
 
 function resetProgressBar() {
     const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = '0%'; // Redefinir a largura da barra para 0%
-    updateProgressBar(); // Iniciar a barra de progresso novamente
+    progressBar.style.width = '0%'; 
+    updateProgressBar(); 
 }
 
 function nextPage() {
@@ -83,7 +83,7 @@ function nextPage() {
     if (currentPage < totalPages) {
         currentPage++;
     } else {
-        currentPage = 1; // Se estiver na última, volta para a primeira
+        currentPage = 1; 
     }
 
     console.log(`Página atual após: ${currentPage}`);
@@ -92,31 +92,31 @@ function nextPage() {
 
 function startAutoPagination() {
     if (!isPlaying) {
-        updateTableAndPagination(filteredRows); // Atualiza a tabela para a página atual
+        updateTableAndPagination(filteredRows);
         updateProgressBar(); 
         autoPageInterval = setInterval(nextPage, intervalTime); 
-        isPlaying = true; // Defina isPlaying como true aqui
+        isPlaying = true; 
     }
 }
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
-    let currentWidth = parseFloat(progressBar.style.width) || 0; // Captura a largura atual
+    let currentWidth = parseFloat(progressBar.style.width) || 0; 
     let startTime = null; 
-    const duration = intervalTime; // Duração total do progresso
+    const duration = intervalTime; 
 
     function animateProgress(timestamp) {
         if (!startTime) startTime = timestamp; 
         const elapsed = timestamp - startTime; 
-        const progress = Math.min((elapsed / duration) * 100 + currentWidth, 100); // Adiciona a largura atual
+        const progress = Math.min((elapsed / duration) * 100 + currentWidth, 100); 
     
         progressBar.style.width = progress + '%'; 
     
         if (progress < 100) {
             progressInterval = requestAnimationFrame(animateProgress); 
         } else {
-            resetProgressBar(); // Reinicia a barra quando atingir 100%
-            nextPage(); // Avança para a próxima página quando atinge 100%
+            resetProgressBar(); 
+            nextPage(); 
         }
     }
     
@@ -127,19 +127,19 @@ function updateProgressBar() {
 function stopAutoPagination() {
     clearInterval(autoPageInterval);
     if (progressInterval) {
-        cancelAnimationFrame(progressInterval); // Para a animação da barra de progresso
+        cancelAnimationFrame(progressInterval); 
     }
     const progressBar = document.getElementById('progress-bar');
-    const currentWidth = parseFloat(progressBar.style.width); // Obtém a largura atual da barra
-    progressBar.style.width = currentWidth + '%'; // Mantém a largura atual
-    isPlaying = false; // Defina isPlaying como false aqui
+    const currentWidth = parseFloat(progressBar.style.width); 
+    progressBar.style.width = currentWidth + '%'; 
+    isPlaying = false; 
 }
 
-// Controlar a funcionalidade de play e pause
+
 controlButton.onclick = () => {
     if (isPlaying) {
-        stopAutoPagination(); // Para a paginação automática
-        controlButton.innerHTML = '<i class="fa-solid fa-play"></i>'; // Muda para ícone de play
+        stopAutoPagination(); 
+        controlButton.innerHTML = '<i class="fa-solid fa-play"></i>'; 
     } else {
         startAutoPagination(); 
         controlButton.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
