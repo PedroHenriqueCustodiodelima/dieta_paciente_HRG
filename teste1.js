@@ -10,10 +10,6 @@ const prevSetBtn = document.getElementById('prev-set');
 const nextSetBtn = document.getElementById('next-set');
 const pageNumbersContainer = document.getElementById('page-numbers');
 
-const intervalTime = 40000; 
-let autoPageInterval; 
-let progressInterval; 
-
 function limitarTexto(texto, limite) {
     if (texto.length > limite) {
         return texto.substring(0, limite) + '... <a href="#" class="ver-mais" data-fulltext="' + texto + '">Ver mais</a>';
@@ -44,7 +40,6 @@ function showPage(page, rows) {
         });
     }
 
-    
     limitarTextoEmObservacoes();
 }
 
@@ -67,10 +62,7 @@ function updatePagination(rows) {
 
         pageNumber.onclick = () => {
             currentPage = i;
-            clearInterval(autoPageInterval); 
-            clearInterval(progressInterval); 
             updateTableAndPagination(filteredRows);
-            updateProgressBar(); 
         };
 
         pageNumbersContainer.appendChild(pageNumber);
@@ -89,53 +81,18 @@ function updateTableAndPagination(rows) {
 
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
-
     if (currentPage < totalPages) {
         currentPage++;
     } else {
         currentPage = 1; 
     }
-
-    console.log(`Página atual após: ${currentPage}`);
     updateTableAndPagination(filteredRows);
-    updateProgressBar();
-}
-
-function startAutoPagination() {
-    currentPage = 1; 
-    updateTableAndPagination(filteredRows); 
-    updateProgressBar(); 
-    autoPageInterval = setInterval(nextPage, intervalTime); 
 }
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
     progressBar.style.width = '0%'; 
-    let startTime = null; 
-    const duration = intervalTime; 
-
-    function animateProgress(timestamp) {
-        if (!startTime) startTime = timestamp; 
-        const elapsed = timestamp - startTime; 
-        const progress = Math.min((elapsed / duration) * 100, 100); 
-
-        progressBar.style.width = progress + '%'; 
-
-        if (progress < 100) {
-            requestAnimationFrame(animateProgress); 
-        }
-    }
-
-    requestAnimationFrame(animateProgress); 
 }
-
-function stopAutoPagination() {
-    clearInterval(autoPageInterval);
-    clearInterval(progressInterval);
-}
-
-
 
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -143,7 +100,6 @@ function openModal(modalId) {
         modal.style.display = 'block';
     }
 }
-
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -176,7 +132,6 @@ document.addEventListener("click", function(event) {
     }
 });
 
-
 document.addEventListener("DOMContentLoaded", function() {
     tableRows.forEach(row => {
         const obsElement = row.querySelector('.observacao-limited');
@@ -187,13 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     showPage(currentPage, filteredRows); 
-    startAutoPagination(); 
 });
-
-
-
-
-
 
 
 

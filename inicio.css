@@ -1,0 +1,83 @@
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+}
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: center; 
+    margin: 0; 
+}
+.card {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    height: 150px;
+    display: flex;
+    flex-direction: row;
+}
+
+.card:hover {
+    transform: scale(1.05); /* Aumenta o tamanho ao passar o mouse */
+}
+
+/* Dividindo o card em duas partes */
+.icon-part {
+    width: 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: white;
+}
+
+.text-part {
+    width: 65%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: rgb(0, 0, 0);
+}
+
+/* Cores diferentes para cada card */
+.grafico-card .icon-part {
+    background-color: rgb(17, 190, 89);
+}
+
+.paineis-card .icon-part {
+    background-color: #001f3f;
+}
+
+.nutricionista-card .icon-part {
+    background-color: green;
+}
+
+.grafico-card .text-part {
+    background-color: #ffffff;
+}
+
+.paineis-card .text-part {
+    background-color: #ffffff;
+}
+
+.nutricionista-card .text-part {
+    background-color: #ffffff;
+}
+
+.card-title {
+    font-size: 1.2rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit; /* Garante que o link terá as mesmas cores que o texto */
+}

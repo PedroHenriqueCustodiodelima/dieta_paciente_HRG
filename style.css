@@ -129,3 +129,10 @@ table th, table td {
 #idade td{
     font-size:6px;
 }
+.custom-link {
+    text-decoration: none;
+    color: #001f3f;
+    margin-left: 10px;
+    display: inline-flex; /* Ou inline-block */
+    align-items: center;
+}

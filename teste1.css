@@ -102,33 +102,7 @@ table th, table td {
     transition: transform 0.3s;
     transform: rotate(0deg);
 }
-.button-style_total{
-    color: white; 
-    background-color: #A4A7AB; 
-    border-radius: 5px; 
-    padding: 4px 4px; 
-    display: inline-block; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-    transition: background-color 0.3s; 
-}
-.button-style_admissao{
-    color: white; 
-    background-color: #1A2DA3; 
-    border-radius: 5px; 
-    padding: 4px 4px; 
-    display: inline-block; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-    background-color: #234F88;
-}
-.button-style_altas{
-    color: white; 
-    background-color: #1A2DA3; 
-    border-radius: 5px; 
-    padding: 4px 4px; 
-    display: inline-block; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-    background-color: #23884D;
-}
+
 #idade td{
     font-size:6px;
 }
@@ -160,4 +134,38 @@ table th, table td {
     right: 20px; 
     font-size: 25px; 
     cursor: pointer; 
+}
+.button-style_total{
+    color: white; 
+    background-color: #A4A7AB; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    transition: background-color 0.3s; 
+}
+.button-style_admissao{
+    color: white; 
+    background-color: #1A2DA3; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    background-color: #234F88;
+}
+.button-style_altas{
+    color: white; 
+    background-color: #1A2DA3; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    background-color: #23884D;
+}
+.custom-link {
+    text-decoration: none;
+    color: #001f3f;
+    margin-left: 10px;
+    display: inline-flex; /* Ou inline-block */
+    align-items: center;
 }

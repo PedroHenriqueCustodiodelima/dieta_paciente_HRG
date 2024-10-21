@@ -189,6 +189,10 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+<a href="inicio.php" class="custom-link">
+    <i class="fa-solid fa-circle-left" style="font-size: 20px; margin-right: 8px;"></i>
+    <span>Voltar</span>
+</a>
 
 <div class="container-fluid mt-5">
     <div class="row justify-content-between">
