@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabela de Pacientes com Paginação Dinâmica</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="teste1.css">
+    <link rel="stylesheet" href="css/teste1.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -181,36 +181,12 @@ try {
     echo "Erro: " . $e->getMessage();
 }
 
-// Calcular o total de pacientes e os em alta e admissão
-$totalPacientes = count($result); // Total de pacientes
-$pacientesAlta = 0; // Inicializa contagem de pacientes em alta
-$pacientesAdmissao = 0; // Inicializa contagem de pacientes em admissão
 
-foreach ($result as $row) {
-    if ($row['TIPO'] === 'ALTA') {
-        $pacientesAlta++;
-    } elseif ($row['TIPO'] === 'ADMISSAO') {
-        $pacientesAdmissao++;
-    }
-}
+$totalPacientes = count($result); 
+$pacientesAlta = 0; 
+$pacientesAdmissao = 0; 
 
-if (!empty($groupedPatients)) {
-    foreach ($groupedPatients as $patient) {
-        // Aqui você pode renderizar a tabela com os dados dos pacientes
-        echo "<tr>
-            <td>{$patient['REGISTRO']}</td>
-            <td>{$patient['PACIENTE']}</td>
-            <td>{$patient['IDADE']}</td>
-            <td>{$patient['CONVENIO']}</td>
-            <td>{$patient['UNIDADE']}</td>
-            <td>{$patient['LEITO']}</td>
-            <td>{$patient['PRESCRICAO']}</td>
-            <td>{$patient['ADMISSÃO']}</td>
-            <td>" . implode(", ", $patient['DIETAS']) . "</td>
-            <td>" . implode(", ", $patient['OBS']) . "</td>
-        </tr>";
-    }
-}
+
 ?>
 
 <div class="container">
@@ -245,42 +221,6 @@ if (!empty($groupedPatients)) {
         </div>
     </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Registro</th>
-                <th>Paciente</th>
-                <th>Idade</th>
-                <th>Convênio</th>
-                <th>Unidade</th>
-                <th>Leito</th>
-                <th>Prescrição</th>
-                <th>Data de Admissão</th>
-                <th>Dietas</th>
-                <th>Observações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if (!empty($groupedPatients)) {
-                foreach ($groupedPatients as $patient) {
-                    echo "<tr>
-                        <td>{$patient['REGISTRO']}</td>
-                        <td>{$patient['PACIENTE']}</td>
-                        <td>{$patient['IDADE']}</td>
-                        <td>{$patient['CONVENIO']}</td>
-                        <td>{$patient['UNIDADE']}</td>
-                        <td>{$patient['LEITO']}</td>
-                        <td>{$patient['PRESCRICAO']}</td>
-                        <td>{$patient['ADMISSÃO']}</td>
-                        <td>" . implode(", ", $patient['DIETAS']) . "</td>
-                        <td>" . implode(", ", $patient['OBS']) . "</td>
-                    </tr>";
-                }
-            }
-            ?>
-        </tbody>
-    </table>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
