@@ -169,3 +169,63 @@ table th, table td {
     display: inline-flex; /* Ou inline-block */
     align-items: center;
 }
+.container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+.card {
+    border-radius: 10px; 
+    transition: transform 0.3s; 
+    position: relative; 
+    overflow: hidden; 
+}
+
+.card:hover {
+    transform: scale(1.05); 
+}
+
+.card-title {
+    position: relative; 
+    z-index: 1; 
+    margin-bottom: 20px; 
+}
+
+.card-text {
+    font-weight: bold; 
+    position: relative; 
+    z-index: 1; 
+}
+
+.icon-background {
+    position: absolute;
+    bottom: 10px; 
+    right: 10px; 
+    font-size: 80px; 
+    opacity: 0.15; 
+    z-index: 0; 
+    transition: transform 0.3s, font-size 0.3s; 
+}
+
+.card:hover .icon-background {
+    transform: translate(15px, -15px) scale(0.7); 
+}
+
+.row {
+    margin-bottom: 20px; 
+}
+
+.card-total {
+    background-color: #4a90e2; 
+    color: white;
+}
+
+.card-alta {
+    background-color: #7ed321; 
+    color: white;
+}
+
+.card-admissao {
+    background-color: #f5a623; 
+    color: white;
+}
