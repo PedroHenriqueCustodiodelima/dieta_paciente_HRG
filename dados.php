@@ -19,7 +19,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
-    $hoursFilter = 24; 
+    $hoursFilter = 6; 
 
     if (isset($_POST['filter'])) {
         switch ($_POST['filter']) {
@@ -56,7 +56,7 @@ try {
         LOC.LOC_NOME AS 'LEITO',
         ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
         ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-        PSC.PSC_OBS AS 'OBS' ,
+		PSC.PSC_OBS AS 'OBS' ,
         DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
     FROM
         HSP
@@ -96,7 +96,7 @@ try {
             LOC.LOC_NOME AS 'LEITO',
             ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-            PSC.PSC_OBS AS 'OBS' ,
+			PSC.PSC_OBS AS 'OBS' ,
             DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
         FROM
             HSP
@@ -118,9 +118,9 @@ try {
     $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
     $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+
     
-    // Inicializa a variável como um array vazio
-    $groupedPatients = []; 
+    $groupedPatients = [];
 
     if (count($result) > 0) {
         $previousStates = []; 
@@ -136,13 +136,14 @@ try {
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
         
+            
             if (!isset($groupedPatients[$registro])) {
                 $groupedPatients[$registro] = [
                     'REGISTRO' => $registro,
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
-                    'UNIDADE' => $unidade, 
-                    'LEITO' => $leito,     
+                    'UNIDADE' => $unidade,
+                    'LEITO' => $leito,
                     'PRESCRICAO' => $prescricao,
                     'DIETAS' => [],
                     'OBS' => [],
@@ -150,20 +151,22 @@ try {
                     'IDADE' => $idade,
                     'TIPO' => $tipo
                 ];
-                
             } else {
+                
                 if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
                     echo "<script>showNotification('$patientName');</script>";
                 }
             }
             $previousStates[$registro] = $tipo;
         
+           
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
                 if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
                     $groupedPatients[$registro]['DIETAS'][] = $dietName;
                 }
             }
+            
             
             if (!empty($row['OBS'])) {
                 $obsText = capitalizeFirstLetters($row['OBS']);
@@ -173,6 +176,7 @@ try {
             }
         }
         
+        
         $groupedPatients = array_values($groupedPatients);
         
     }
@@ -180,18 +184,26 @@ try {
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
-
-
-$totalPacientes = count($result); 
-$pacientesAlta = 0; 
-$pacientesAdmissao = 0; 
-
-
 ?>
+
 
 <div class="container">
     <h1 class="text-center my-4">Dashboard de Pacientes</h1>
+
+    <!-- Filtro de horas -->
+    <form method="POST" action="" class="mb-4">
+        <div class="input-group">
+            <label class="input-group-text" for="filter">Filtrar por horas:</label>
+            <select name="filter" id="filter" class="form-select">
+                <option value="last24hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last24hours') ? 'selected' : ''; ?>>Últimas 24 horas</option>
+                <option value="last12hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last12hours') ? 'selected' : ''; ?>>Últimas 12 horas</option>
+                <option value="last6hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last6hours') ? 'selected' : ''; ?>>Últimas 6 horas</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Filtrar</button>
+        </div>
+    </form>
     
+    <!-- Cards com informações dos pacientes -->
     <div class="row">
         <div class="col-md-4">
             <div class="card bg-primary text-white mb-4">
@@ -201,7 +213,7 @@ $pacientesAdmissao = 0;
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card bg-success text-white mb-4">
                 <div class="card-body">
@@ -210,7 +222,7 @@ $pacientesAdmissao = 0;
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card bg-warning text-white mb-4">
                 <div class="card-body">
@@ -220,7 +232,6 @@ $pacientesAdmissao = 0;
             </div>
         </div>
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
