@@ -15,6 +15,7 @@
 include 'conexao.php'; 
 include 'header.php';
 
+
 function capitalizeFirstLetters($string) {
     return ucwords(strtolower($string));
 }
@@ -24,7 +25,7 @@ $pacientesAlta = 0;
 $pacientesAdmissao = 0;
 
 try {
-    $hoursFilter = 6; 
+    $hoursFilter = 12; 
 
     if (isset($_POST['filter'])) {
         switch ($_POST['filter']) {
@@ -218,7 +219,7 @@ try {
             $quantidadePacientes[] = $row['QUANTIDADE_PACIENTES'];
         }
         }
-
+        
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
@@ -228,13 +229,16 @@ try {
     <i class="fa-solid fa-circle-left" style="font-size: 20px; margin-right: 8px;"></i>
     <span>Voltar</span>
 </a>
+
+
 <div class="container">
-    <h1 class="text-center my-4">Dados de Pacientes</h1>
+    <h1 class="text-center my-4">Pacientes</h1>
 
     <form method="POST" action="" class="mb-4">
         <div class="input-group">
             <label class="input-group-text" for="filter">Filtrar por horas:</label>
             <select name="filter" id="filter" class="form-select">
+                <option value="">Selecione um horário</option>
                 <option value="last24hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last24hours') ? 'selected' : ''; ?>>Últimas 24 horas</option>
                 <option value="last12hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last12hours') ? 'selected' : ''; ?>>Últimas 12 horas</option>
                 <option value="last6hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last6hours') ? 'selected' : ''; ?>>Últimas 6 horas</option>
@@ -278,56 +282,124 @@ try {
 
 
 
+<?php
 
+$leitoCounts = [];
+foreach ($groupedPatients as $patient) {
+    $leito = $patient['LEITO'];
 
+    if (!isset($leitoCounts[$leito])) {
+        $leitoCounts[$leito] = 0;
+    }
+    $leitoCounts[$leito]++;
+}
 
+$convênioCounts = [];
+foreach ($groupedPatients as $patient) {
+    $convenio = $patient['CONVENIO'];
 
+    if (!isset($convênioCounts[$convenio])) {
+        $convênioCounts[$convenio] = 0;
+    }
+    $convênioCounts[$convenio]++;
+}
 
+// Contagem de Pacientes por Unidade
+$unidadeCounts = [];
+foreach ($groupedPatients as $patient) {
+    $unidade = $patient['UNIDADE'];
 
+    if (!isset($unidadeCounts[$unidade])) {
+        $unidadeCounts[$unidade] = 0;
+    }
+    $unidadeCounts[$unidade]++;
+}
 
+// Contagem de Pacientes por Prescrição
+$prescricaoCounts = [];
+foreach ($groupedPatients as $patient) {
+    $prescricao = $patient['PRESCRICAO'];
 
-<div class="container">
-    <div class="canvas-container">
-        <canvas id="barChart"></canvas>
-        <canvas id="lineChart"></canvas>
+    if (!isset($prescricaoCounts[$prescricao])) {
+        $prescricaoCounts[$prescricao] = 0;
+    }
+    $prescricaoCounts[$prescricao]++;
+}
+
+ksort($leitoCounts);
+ksort($convênioCounts);
+ksort($unidadeCounts);
+ksort($prescricaoCounts);
+?>
+
+<?php if (!empty($leitoCounts) || !empty($convênioCounts) || !empty($unidadeCounts) || !empty($prescricaoCounts)): ?>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Gráficos de Pacientes</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4"> <!-- Ajuste a altura e espaçamento entre os gráficos -->
+                        <canvas id="barChart" style="width: 100%; height: 300px;"></canvas>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <canvas id="lineChart" style="width: 100%; height: 300px;"></canvas>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <canvas id="unitBarChart" style="width: 100%; height: 300px;"></canvas>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <canvas id="prescriptionChart" style="width: 100%; height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<style>
-    .canvas-container {
-        width: 100%;
-        height: 300px; 
-        display: flex; 
-        justify-content: space-around; 
-    }
-    
-    canvas {
-        width: 100% !important;
-        height: auto !important; 
-    }
-</style>
+    <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const leitos = <?php echo json_encode(array_keys($leitoCounts)); ?>;
+        const countsByLeito = <?php echo json_encode(array_values($leitoCounts)); ?>;
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Dados dos leitos
-        const labels = <?php echo json_encode($leitos); ?>; // Nomes dos leitos
-        const data = {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Quantidade de Pacientes por Leito',
-                    data: <?php echo json_encode($quantidadePacientes); ?>, // Quantidade de pacientes por leito
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)', // Azul claro
-                    borderColor: 'rgba(54, 162, 235, 1)', // Azul escuro
-                    borderWidth: 2,
-                }
-            ]
-        };
+        const convenios = <?php echo json_encode(array_keys($convênioCounts)); ?>;
+        const countsByConvenio = <?php echo json_encode(array_values($convênioCounts)); ?>;
 
-        // Configuração do gráfico de barras
-        const configBar = {
+        const unidades = <?php echo json_encode(array_keys($unidadeCounts)); ?>;
+        const countsByUnidade = <?php echo json_encode(array_values($unidadeCounts)); ?>;
+
+        const prescricoes = <?php echo json_encode(array_keys($prescricaoCounts)); ?>;
+        const countsByPrescricao = <?php echo json_encode(array_values($prescricaoCounts)); ?>;
+
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        const unitBarCtx = document.getElementById('unitBarChart').getContext('2d');
+        const prescriptionCtx = document.getElementById('prescriptionChart').getContext('2d');
+
+        // Defina cores para os gráficos
+        const colors = [
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(201, 203, 207, 0.6)'
+        ];
+
+        // Gráfico de Barras (Leitos)
+        const barChart = new Chart(barCtx, {
             type: 'bar',
-            data: data,
+            data: {
+                labels: leitos,
+                datasets: [{
+                    label: 'Quantidade de Pacientes por Leito',
+                    data: countsByLeito,
+                    backgroundColor: countsByLeito.map((_, index) => colors[index % colors.length]),
+                    borderColor: countsByLeito.map((_, index) => colors[index % colors.length].replace('0.6', '1')),
+                    borderWidth: 1
+                }]
+            },
             options: {
                 scales: {
                     y: {
@@ -335,44 +407,94 @@ try {
                     }
                 }
             }
-        };
+        });
 
-        // Criar o gráfico de barras
-        const barChart = new Chart(
-            document.getElementById('barChart'),
-            configBar
-        );
-
-        // Configuração do gráfico de linha (opcional, mas pode ser mantido)
-        const configLine = {
+        // Gráfico de Linhas (Convênios)
+        const lineChart = new Chart(lineCtx, {
             type: 'line',
-            data: data,
+            data: {
+                labels: convenios,
+                datasets: [{
+                    label: 'Quantidade de Pacientes por Convênio',
+                    data: countsByConvenio,
+                    fill: false,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Barras (Unidades)
+        const unitBarChart = new Chart(unitBarCtx, {
+            type: 'bar',
+            data: {
+                labels: unidades,
+                datasets: [{
+                    label: 'Quantidade de Pacientes por Unidade',
+                    data: countsByUnidade,
+                    backgroundColor: countsByUnidade.map((_, index) => colors[index % colors.length]),
+                    borderColor: countsByUnidade.map((_, index) => colors[index % colors.length].replace('0.6', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Linhas (Prescrições)
+        const prescriptionChart = new Chart(prescriptionCtx, {
+            type: 'line', // Altere de 'doughnut' para 'line'
+            data: {
+                labels: prescricoes,
+                datasets: [{
+                    label: 'Quantidade de Pacientes por Prescrição',
+                    data: countsByPrescricao,
+                    fill: false, // Para não preencher a área abaixo da linha
+                    borderColor: 'rgba(75, 192, 192, 1)', // Cor da linha
+                    tension: 0.1 // Suaviza a linha
+                }]
+            },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Distribuição de Pacientes por Leito'
-                    }
-                },
+                maintainAspectRatio: false, // Garante que o gráfico respeite as dimensões do canvas
                 scales: {
                     y: {
                         beginAtZero: true
                     }
                 }
             }
-        };
-
-        // Criar o gráfico de linha
-        const lineChart = new Chart(
-            document.getElementById('lineChart'),
-            configLine
-        );
+        });
     });
+    </script>
+<?php else: ?>
+    <div class="container mt-4">
+        <h2>Não há dados suficientes para exibir gráficos.</h2>
+    </div>
+<?php endif; ?>
+
+
+
+<script>
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime();
+    setInterval(() => {
+        location.reload();
+    }, 300000); 
 </script>
+
+
 
 
 

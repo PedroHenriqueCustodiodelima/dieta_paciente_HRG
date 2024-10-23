@@ -44,7 +44,7 @@ include 'header.php';
                     </div>
                     <div class="text-part">
                         <h5 class="card-title">Painéis</h5>
-                        <p class="card-text">Acesse os painéis de controle.</p>
+                        <p class="card-text">Painel para copeiros.</p>
                     </div>
                 </div>
             </a>
@@ -59,13 +59,29 @@ include 'header.php';
                     </div>
                     <div class="text-part">
                         <h5 class="card-title">Nutricionista</h5>
-                        <p class="card-text">Gerencie os dados do nutricionista.</p>
+                        <p class="card-text">Painel para nutricionista.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Card para Edição -->
+        <div class="col-md-4">
+            <a href="edicao.php" class="card-link">
+                <div class="card edicao-card">
+                    <div class="icon-part">
+                        <i class="fa-solid fa-user-pen" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="text-part">
+                        <h5 class="card-title">Edição</h5>
+                        <p class="card-text">Edite os dados dos pacientes.</p>
                     </div>
                 </div>
             </a>
         </div>
     </div>
 </main>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/teste.js"></script>

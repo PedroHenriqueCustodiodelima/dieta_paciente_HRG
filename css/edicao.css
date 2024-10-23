@@ -1,0 +1,23 @@
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+}
+
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: center; 
+    margin: 0; 
+}
+.custom-link {
+    text-decoration: none;
+    color: #001f3f;
+    margin-left: 10px;
+    display: inline-flex; /* Ou inline-block */
+    align-items: center;
+}

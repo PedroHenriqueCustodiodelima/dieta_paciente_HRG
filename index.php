@@ -198,19 +198,9 @@ try {
     <div class="row justify-content-between">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center w-100" style="padding: 0;">
-                <form method="POST" action="" style="margin: 0; display: inline-block;">
-                    <div class="d-flex align-items-center">
-                        <select name="filter" class="form-select mb-3" aria-label="Select Filter" style="width: 300px; height: 35px; margin-top: 20px;">
-                            <option value="">Selecione um horário</option>
-                            <option value="last6hours">Últimas 6 Horas</option>
-                            <option value="last12hours">Últimas 12 Horas</option>
-                            <option value="last24hours">Últimas 24 Horas</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary mb-3 btn-sm ms-2" style="margin-top: 20px;">Aplicar Filtro</button>
-                    </div>
-                </form>
-                
-                <form method="POST" action="" class="text-start" style="margin: 0;">
+                <form method="POST" action="" style="margin: 0; display: inline-block;">             
+                </form>       
+                <form method="POST" action="" class="text-start" style="margin: 12px;">
                     <div class="button-style_total">
                         <strong>Total de Pacientes:</strong> <?= count($groupedPatients); ?>
                     </div>
@@ -234,9 +224,6 @@ try {
                 }).showToast();
             }
         </script>
-        <div class="mb-3">
-            <input type="text" id="filterInput" class="form-control" placeholder="Filtrar por paciente..." onkeyup="filterTable()">
-        </div>
         <div id="progress-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;">
             <div id="progress-bar" style="width: 0%; height: 5px; background-color: #001f3f"></div>
         </div>
