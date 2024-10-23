@@ -69,12 +69,10 @@ function updateTableAndPagination(rows) {
 function nextPage() {
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
     console.log(`Total de páginas: ${totalPages}, Página atual antes: ${currentPage}`);
-
-    // Verifique se não está na última página antes de incrementar
     if (currentPage < totalPages) {
         currentPage++;
     } else {
-        currentPage = 1; // Se estiver na última, vai para a primeira
+        currentPage = 1; 
     }
 
     console.log(`Página atual após: ${currentPage}`);
@@ -83,8 +81,8 @@ function nextPage() {
 }
 
 function startAutoPagination() {
-    currentPage = 1; // Adiciona a garantia de que a página começa em 1
-    updateTableAndPagination(filteredRows); // Atualiza a tabela para a primeira página
+    currentPage = 1; 
+    updateTableAndPagination(filteredRows); 
     updateProgressBar(); 
     autoPageInterval = setInterval(nextPage, intervalTime); 
 }

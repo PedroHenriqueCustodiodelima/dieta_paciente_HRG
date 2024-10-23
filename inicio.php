@@ -20,7 +20,6 @@ include 'header.php';
 
 <main class="container my-5">
     <div class="row">
-        <!-- Card para o Gráfico -->
         <div class="col-md-4">
             <a href="dados.php" class="card-link">
                 <div class="card grafico-card">
@@ -35,7 +34,6 @@ include 'header.php';
             </a>
         </div>
 
-        <!-- Card para Painéis -->
         <div class="col-md-4">
             <a href="index.php" class="card-link">
                 <div class="card paineis-card">
@@ -50,7 +48,6 @@ include 'header.php';
             </a>
         </div>
 
-        <!-- Card para Nutricionista -->
         <div class="col-md-4">
             <a href="teste1.php" class="card-link">
                 <div class="card nutricionista-card">
@@ -65,7 +62,6 @@ include 'header.php';
             </a>
         </div>
 
-        <!-- Card para Edição -->
         <div class="col-md-4">
             <a href="edicao.php" class="card-link">
                 <div class="card edicao-card">

@@ -22,7 +22,7 @@ function limitarTextoEmObservacoes() {
 
     observacoes.forEach(obs => {
         const textoOriginal = obs.getAttribute('data-fulltext') || obs.innerText;
-        obs.innerHTML = limitarTexto(textoOriginal, 50); // limite de 50 caracteres
+        obs.innerHTML = limitarTexto(textoOriginal, 50); 
     });
 }
 

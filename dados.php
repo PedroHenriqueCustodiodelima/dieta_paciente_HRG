@@ -140,8 +140,6 @@ try {
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
-        
-            // Contagem de pacientes
             if (!isset($groupedPatients[$registro])) {
                 $totalPacientes++;
                 
@@ -185,10 +183,6 @@ try {
                 }
             }
         }
-
-
-        
-
         $groupedPatients = array_values($groupedPatients);
     }
         $queryLeitos = "
@@ -208,8 +202,6 @@ try {
         ";
 
         $resultLeitos = $connection->query($queryLeitos)->fetchAll(PDO::FETCH_ASSOC);
-
-        // Preparar os dados para o gráfico
         $leitos = [];
         $quantidadePacientes = [];
 
@@ -303,8 +295,6 @@ foreach ($groupedPatients as $patient) {
     }
     $convênioCounts[$convenio]++;
 }
-
-// Contagem de Pacientes por Unidade
 $unidadeCounts = [];
 foreach ($groupedPatients as $patient) {
     $unidade = $patient['UNIDADE'];
@@ -314,8 +304,6 @@ foreach ($groupedPatients as $patient) {
     }
     $unidadeCounts[$unidade]++;
 }
-
-// Contagem de Pacientes por Prescrição
 $prescricaoCounts = [];
 foreach ($groupedPatients as $patient) {
     $prescricao = $patient['PRESCRICAO'];
@@ -340,7 +328,7 @@ ksort($prescricaoCounts);
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-4"> <!-- Ajuste a altura e espaçamento entre os gráficos -->
+                    <div class="col-md-6 mb-4"> 
                         <canvas id="barChart" style="width: 100%; height: 300px;"></canvas>
                     </div>
                     <div class="col-md-6 mb-4">
@@ -375,8 +363,6 @@ ksort($prescricaoCounts);
         const lineCtx = document.getElementById('lineChart').getContext('2d');
         const unitBarCtx = document.getElementById('unitBarChart').getContext('2d');
         const prescriptionCtx = document.getElementById('prescriptionChart').getContext('2d');
-
-        // Defina cores para os gráficos
         const colors = [
             'rgba(54, 162, 235, 0.6)',
             'rgba(255, 99, 132, 0.6)',
@@ -386,8 +372,6 @@ ksort($prescricaoCounts);
             'rgba(255, 159, 64, 0.6)',
             'rgba(201, 203, 207, 0.6)'
         ];
-
-        // Gráfico de Barras (Leitos)
         const barChart = new Chart(barCtx, {
             type: 'bar',
             data: {
@@ -408,8 +392,6 @@ ksort($prescricaoCounts);
                 }
             }
         });
-
-        // Gráfico de Linhas (Convênios)
         const lineChart = new Chart(lineCtx, {
             type: 'line',
             data: {
@@ -430,8 +412,6 @@ ksort($prescricaoCounts);
                 }
             }
         });
-
-        // Gráfico de Barras (Unidades)
         const unitBarChart = new Chart(unitBarCtx, {
             type: 'bar',
             data: {
@@ -452,23 +432,21 @@ ksort($prescricaoCounts);
                 }
             }
         });
-
-        // Gráfico de Linhas (Prescrições)
         const prescriptionChart = new Chart(prescriptionCtx, {
-            type: 'line', // Altere de 'doughnut' para 'line'
+            type: 'line', 
             data: {
                 labels: prescricoes,
                 datasets: [{
                     label: 'Quantidade de Pacientes por Prescrição',
                     data: countsByPrescricao,
-                    fill: false, // Para não preencher a área abaixo da linha
-                    borderColor: 'rgba(75, 192, 192, 1)', // Cor da linha
-                    tension: 0.1 // Suaviza a linha
+                    fill: false, 
+                    borderColor: 'rgba(75, 192, 192, 1)', 
+                    tension: 0.1 
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // Garante que o gráfico respeite as dimensões do canvas
+                maintainAspectRatio: false, 
                 scales: {
                     y: {
                         beginAtZero: true

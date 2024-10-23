@@ -47,9 +47,9 @@
     color: rgb(0, 0, 0);
 }
 
-/* Adicione a nova classe para o card de edição */
+
 .edicao-card .icon-part {
-    background-color: #FFA500; /* Cor de fundo para o card de edição (laranja) */
+    background-color: #FFA500; 
 }
 
 .grafico-card .icon-part {

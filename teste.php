@@ -131,7 +131,7 @@ try {
             $patientName = capitalizeFirstLetters($row['PACIENTE']);
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
-            $unidade = capitalizeFirstLetters($row['UNIDADE']); // Adicionando a unidade aqui
+            $unidade = capitalizeFirstLetters($row['UNIDADE']); 
             $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
             $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])); 
             $idade = $row['IDADE'];
@@ -143,7 +143,7 @@ try {
                     'PACIENTE' => $patientName,
                     'CONVENIO' => $convenio,
                     'LEITO' => $leito,
-                    'UNIDADE' => $unidade, // Adicionando unidade aqui
+                    'UNIDADE' => $unidade, 
                     'PRESCRICAO' => $prescricao,
                     'DIETAS' => [], 
                     'ADMISSÃO' => $admissao, 
@@ -236,7 +236,7 @@ try {
                     <th>Registro</th>
                     <th id="paciente-header" style="cursor: pointer;">Paciente <i id="sort-paciente-icon" class="fa-solid fa-caret-up"></i></th>
                     <th id="convenio-header" style="cursor: pointer;">Convênio <i id="sort-convenio-icon" class="fa-solid fa-caret-up"></i></th>
-                    <th>Leito e Unidade</th> <!-- Coluna combinada -->
+                    <th>Leito e Unidade</th> 
                     <th id="prescricao-header" style="min-width: 150px;">Prescrição <i id="sort-icon" class="fa-solid fa-caret-up"></i></th>
                     <th>Dieta</th>
                     <th id="admissao-header" style="min-width: 150px;">Data <i id="sort-admissao-icon" class="fa-solid fa-caret-up"></i></th>

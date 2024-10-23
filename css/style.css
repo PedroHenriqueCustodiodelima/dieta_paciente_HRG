@@ -14,9 +14,9 @@ table {
     text-transform: uppercase;
 }
 .obs {
-    width: 80%; /* Ajuste a porcentagem conforme necessário */
-    word-wrap: break-word; /* Permite que o texto quebre em várias linhas, se necessário */
-    white-space: normal; /* Permite que o texto quebre, ao contrário de nowrap que mantém tudo em uma linha */
+    width: 80%; 
+    word-wrap: break-word; 
+    white-space: normal; 
 }
 
 table {
@@ -24,7 +24,7 @@ table {
     -moz-osx-font-smoothing: grayscale;
 }
 .active-page {
-    background-color: #fdfdfd; /* ou outra cor */
+    background-color: #fdfdfd; 
     color: green;
     font-weight: bold;
 }
@@ -133,6 +133,6 @@ table th, table td {
     text-decoration: none;
     color: #001f3f;
     margin-left: 10px;
-    display: inline-flex; /* Ou inline-block */
+    display: inline-flex; 
     align-items: center;
 }

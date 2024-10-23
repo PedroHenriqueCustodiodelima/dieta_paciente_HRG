@@ -18,6 +18,6 @@
     text-decoration: none;
     color: #001f3f;
     margin-left: 10px;
-    display: inline-flex; /* Ou inline-block */
+    display: inline-flex; 
     align-items: center;
 }

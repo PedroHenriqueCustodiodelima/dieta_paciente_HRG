@@ -18,7 +18,7 @@ table {
     -moz-osx-font-smoothing: grayscale;
 }
 .active-page {
-    background-color: #fdfdfd; /* ou outra cor */
+    background-color: #fdfdfd; 
     color: green;
     font-weight: bold;
 }
