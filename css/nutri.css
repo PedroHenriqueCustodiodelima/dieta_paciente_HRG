@@ -1,0 +1,231 @@
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+}
+table {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.obs {
+    width: 80%; 
+    word-wrap: break-word; 
+    white-space: normal; 
+}
+
+table {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.active-page {
+    background-color: #fdfdfd; 
+    color: green;
+    font-weight: bold;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: center; 
+    margin: 0; 
+}
+
+#keyboard-navigation-message {
+    display: none; 
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+    background-color: #f9f9f9; 
+    border: 1px solid #ddd;
+    padding: 10px; 
+    border-radius: 5px; 
+}
+
+.pagination .page-item .page-link {
+    background-color: rgb(10, 10, 10); 
+    color: white; 
+    border: none !important; 
+    opacity: 1; 
+
+}
+
+.pagination .page-item.active .page-link {
+    background-color:none; 
+    color: white; 
+    border: none !important; 
+    opacity: 1; 
+
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+.uppercase {
+    text-transform: uppercase;
+}
+
+
+#prescricao-header {
+    min-width: 150px; 
+    white-space: nowrap; 
+}
+.rotate-up {
+    transition: transform 0.3s;
+    transform: rotate(180deg);
+}
+
+.rotate-down {
+    transition: transform 0.3s;
+    transform: rotate(0deg);
+}
+
+#idade td{
+    font-size:6px;
+}
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; 
+    position: relative; 
+}
+
+.close-modal {
+    position: absolute; 
+    top: 10px; 
+    right: 20px; 
+    font-size: 25px; 
+    cursor: pointer; 
+}
+.button-style_total{
+    color: white; 
+    background-color: #A4A7AB; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    transition: background-color 0.3s; 
+}
+.button-style_admissao{
+    color: white; 
+    background-color: #1A2DA3; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    background-color: #234F88;
+}
+.button-style_altas{
+    color: white; 
+    background-color: #1A2DA3; 
+    border-radius: 5px; 
+    padding: 4px 4px; 
+    display: inline-block; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    background-color: #23884D;
+}
+.custom-link {
+    text-decoration: none;
+    color: #001f3f;
+    margin-left: 10px;
+    display: inline-flex; 
+    align-items: center;
+}
+.container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+.card {
+    border-radius: 10px; 
+    transition: transform 0.3s; 
+    position: relative; 
+    overflow: hidden; 
+}
+
+.card:hover {
+    transform: scale(1.05); 
+}
+
+.card-title {
+    position: relative; 
+    z-index: 1; 
+    margin-bottom: 20px; 
+}
+
+.card-text {
+    font-weight: bold; 
+    position: relative; 
+    z-index: 1; 
+}
+
+.icon-background {
+    position: absolute;
+    bottom: 10px; 
+    right: 10px; 
+    font-size: 80px; 
+    opacity: 0.15; 
+    z-index: 0; 
+    transition: transform 0.3s, font-size 0.3s; 
+}
+
+.card:hover .icon-background {
+    transform: translate(15px, -15px) scale(0.7); 
+}
+
+.row {
+    margin-bottom: 20px; 
+}
+
+.card-total {
+    background-color: #4a90e2; 
+    color: white;
+}
+
+.card-alta {
+    background-color: #7ed321; 
+    color: white;
+}
+
+.card-admissao {
+    background-color: #f5a623; 
+    color: white;
+}

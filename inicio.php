@@ -27,7 +27,7 @@ include 'header.php';
                         <i class="fa-solid fa-chart-pie" style="font-size: 2rem;"></i>
                     </div>
                     <div class="text-part">
-                        <h5 class="card-title">Gráfico</h5>
+                        <h5 class="card-title">Estatísticas</h5>
                         <p class="card-text">Visualize os dados em formato de gráfico.</p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@ include 'header.php';
         </div>
 
         <div class="col-md-4">
-            <a href="teste1.php" class="card-link">
+            <a href="nutri.php" class="card-link">
                 <div class="card nutricionista-card">
                     <div class="icon-part">
                         <i class="fa-solid fa-user-doctor" style="font-size: 2rem;"></i>
