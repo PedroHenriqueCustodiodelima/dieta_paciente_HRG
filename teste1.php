@@ -96,7 +96,7 @@ include 'header.php';
         /* Estilo específico para diminuir o tamanho do texto nos últimos dois cards */
         .text-small p,
         .text-small .card-title {
-            font-size: 0.8em; /* Tamanho do texto */
+            font-size: 1em; /* Tamanho do texto */
         }
 
         /* Ajuste para centralizar os números e rótulos na mesma linha */
@@ -122,7 +122,7 @@ include 'header.php';
         <div class="row text-center mx-0">
             <!-- Coluna 1: Triagem -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom card-group-1">
+                <div class="card mb-3 shadow card-custom ">
                     <div class="card-body">
                         <h5 class="card-title">Triagem</h5>
                         <hr>
@@ -143,7 +143,7 @@ include 'header.php';
 
             <!-- Coluna 2: Recepção -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom card-group-1">
+                <div class="card mb-3 shadow card-custom ">
                     <div class="card-body">
                         <h5 class="card-title">Recepção</h5>
                         <hr>
@@ -164,7 +164,7 @@ include 'header.php';
 
             <!-- Coluna 3: Clínica Médica -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom card-group-2">
+                <div class="card mb-3 shadow card-custom ">
                     <div class="card-body">
                         <h5 class="card-title">Clínica Médica</h5>
                         <hr>
@@ -177,7 +177,7 @@ include 'header.php';
                                         <p class="number-large">10</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center"> 
+                                    <div class="text-center"style="margin-left: 15px;"> 
                                         <p class="number-large">60</p>
                                         <p class="card-text-title">Minuto(s)</p>
                                     </div>
@@ -190,7 +190,7 @@ include 'header.php';
                                         <p class="number-large">5</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-center" style="margin-left: 15px;">
                                         <p class="number-large">25</p>
                                         <p class="card-text-title">Minuto(s)</p>
                                     </div>
@@ -203,7 +203,7 @@ include 'header.php';
 
             <!-- Coluna 4: Ortopedia -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom card-group-2">
+                <div class="card mb-3 shadow card-custom ">
                     <div class="card-body">
                         <h5 class="card-title">Ortopedia</h5>
                         <hr>
@@ -216,7 +216,7 @@ include 'header.php';
                                         <p class="number-large">10</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center"> 
+                                    <div class="text-center"style="margin-left: 15px;"> 
                                         <p class="number-large">18</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
@@ -229,7 +229,7 @@ include 'header.php';
                                         <p class="number-large">50</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-center"style="margin-left: 15px;">
                                         <p class="number-large">25</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
