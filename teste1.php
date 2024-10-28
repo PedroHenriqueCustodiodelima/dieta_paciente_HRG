@@ -25,108 +25,40 @@ include 'header.php';
 </a>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="container-fluid px-0">
     <h1 class="text-center my-4">Pacientes</h1>
-    <style>
-        /* Ajusta o container principal para ocupar toda a tela */
-        .container-fluid {
-            max-width: 100%;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        /* Ajustes específicos para os cards */
-        .card-custom {
-            background-color: #28a745; /* Cor verde */
-            color: white; /* Texto branco */
-            height: 100%; /* Faz com que todos os cards ocupem a mesma altura */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* Estilos para os dois primeiros cards */
-        .card-group-1 {
-            background-color: #218838; /* Tom mais escuro de verde */
-        }
-
-        /* Estilos para os dois últimos cards */
-        .card-group-2 {
-            background-color: #28a745; /* Cor verde padrão */
-        }
-
-        /* Demais ajustes nos estilos dos cards */
-        .card-custom .card-body {
-            padding: 20px; /* Aumenta o padding interno */
-            text-align: center; /* Centraliza o texto no corpo do card */
-        }
-
-        .card-custom h5 {
-            color: white;
-            font-size: 1em; /* Tamanho do título */
-            margin-bottom: 5px; /* Margem inferior */
-        }
-
-        .card-custom .card-text-title {
-            color: white;
-            font-size: 0.9em; /* Diminuir o tamanho do texto */
-            margin-bottom: 5px; /* Margem inferior */
-        }
-
-        .card-custom .number-large {
-            font-size: 1.8em; /* Ajuste do tamanho do número */
-            font-weight: bold;
-            margin-bottom: 0; /* Remoção de margem inferior */
-        }
-
-        .icon-background {
-            color: white;
-            font-size: 1.8em; /* Tamanho do ícone */
-        }
-
-        .card-custom .d-flex > div {
-            margin: 0; /* Remove margem entre os itens */
-            text-align: center; /* Centraliza o texto dos dois primeiros cards */
-        }
-
-        hr {
-            margin: 5px 0; /* Margem superior e inferior */
-        }
-
-        /* Estilo específico para diminuir o tamanho do texto nos últimos dois cards */
-        .text-small p,
-        .text-small .card-title {
-            font-size: 1em; /* Tamanho do texto */
-        }
-
-        /* Ajuste para centralizar os números e rótulos na mesma linha */
-        .card-info {
-            display: flex;
-            justify-content: center; /* Centraliza horizontalmente */
-            align-items: center; /* Centraliza verticalmente */
-            margin-top: 15px; /* Adiciona um espaço acima do card-info */
-        }
-
-        .card-info div {
-            margin: 0 20px; /* Margem entre os itens */
-            text-align: center; /* Centraliza o texto dentro de cada div */
-        }
-
-        /* Adiciona espaço acima dos números e rótulos */
-        .card-info p {
-            margin-top: 10px; /* Espaço entre o número e o topo do card */
-        }
-    </style>
-
     <div class="container-fluid">
         <div class="row text-center mx-0">
-            <!-- Coluna 1: Triagem -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom ">
+                <div class="card mb-3 shadow card-custom">
                     <div class="card-body">
-                        <h5 class="card-title">Triagem</h5>
+                        <h5 class="card-title">
+                            <i class="fa-solid fa-kit-medical icon-background"></i> Triagem
+                        </h5>
                         <hr>
-                        <i class="fa-solid fa-notes-medical icon-background"></i>
                         <div class="card-info">
                             <div>
                                 <p class="number-large">15</p>
@@ -143,11 +75,12 @@ include 'header.php';
 
             <!-- Coluna 2: Recepção -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom ">
+                <div class="card mb-3 shadow card-custom">
                     <div class="card-body">
-                        <h5 class="card-title">Recepção</h5>
+                        <h5 class="card-title">
+                            <i class="fa-solid fa-user-nurse icon-background"></i> Recepção
+                        </h5>
                         <hr>
-                        <i class="fa-solid fa-user-check icon-background"></i>
                         <div class="card-info">
                             <div>
                                 <p class="number-large">20</p>
@@ -164,35 +97,36 @@ include 'header.php';
 
             <!-- Coluna 3: Clínica Médica -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom ">
+                <div class="card mb-3 shadow card-custom">
                     <div class="card-body">
-                        <h5 class="card-title">Clínica Médica</h5>
+                        <h5 class="card-title">
+                            <i class="fa-solid fa-user-doctor icon-background"></i> Clínica médica
+                        </h5>
                         <hr>
-                        <i class="fa-solid fa-stethoscope icon-background"></i>
                         <div class="d-flex justify-content-between mt-1">
                             <div>
-                                <p class="card-text"><strong>Atendimento:</strong></p>
+                                <p class="card-text">1° Atendimento</p>
                                 <div class="d-flex justify-content-between">
-                                    <div class="text-center"> 
-                                        <p class="number-large">10</p>
+                                    <div class="text-center">
+                                        <p class="number-large1">10</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center"style="margin-left: 15px;"> 
-                                        <p class="number-large">60</p>
-                                        <p class="card-text-title">Minuto(s)</p>
+                                    <div class="text-center" style="margin-left: 15px;">
+                                        <p class="number-large1">18</p>
+                                        <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <p class="card-text"><strong>Reavaliação:</strong></p>
+                                <p class="card-text">Reavaliação</p>
                                 <div class="d-flex justify-content-between">
-                                    <div class="text-center"> 
-                                        <p class="number-large">5</p>
+                                    <div class="text-center">
+                                        <p class="number-large1">50</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
                                     <div class="text-center" style="margin-left: 15px;">
-                                        <p class="number-large">25</p>
-                                        <p class="card-text-title">Minuto(s)</p>
+                                        <p class="number-large1">25</p>
+                                        <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
                             </div>
@@ -203,34 +137,35 @@ include 'header.php';
 
             <!-- Coluna 4: Ortopedia -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom ">
+                <div class="card mb-3 shadow card-custom">
                     <div class="card-body">
-                        <h5 class="card-title">Ortopedia</h5>
+                        <h5 class="card-title">
+                            <i class="fa-solid fa-stethoscope icon-background"></i> Ortopedia
+                        </h5>
                         <hr>
-                        <i class="fa-solid fa-stethoscope icon-background"></i>
                         <div class="d-flex justify-content-between mt-1">
                             <div>
-                                <p class="card-text"><strong>Atendimento:</strong></p>
+                                <p class="card-text">1° Atendimento</p>
                                 <div class="d-flex justify-content-between">
                                     <div class="text-center">
-                                        <p class="number-large">10</p>
+                                        <p class="number-large1">10</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center"style="margin-left: 15px;"> 
-                                        <p class="number-large">18</p>
+                                    <div class="text-center" style="margin-left: 15px;">
+                                        <p class="number-large1">18</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <p class="card-text"><strong>Reavaliação:</strong></p>
+                                <p class="card-text">Reavaliação</p>
                                 <div class="d-flex justify-content-between">
                                     <div class="text-center">
-                                        <p class="number-large">50</p>
+                                        <p class="number-large1">50</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
-                                    <div class="text-center"style="margin-left: 15px;">
-                                        <p class="number-large">25</p>
+                                    <div class="text-center" style="margin-left: 15px;">
+                                        <p class="number-large1">25</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
@@ -242,6 +177,8 @@ include 'header.php';
         </div>
     </div>
 </div>
+
+
 
 
 
