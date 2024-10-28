@@ -183,19 +183,6 @@ include 'header.php';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 <?php
 // Valores estáticos para os gráficos
 $leitoCounts = [
