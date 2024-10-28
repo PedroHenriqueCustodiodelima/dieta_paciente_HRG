@@ -113,3 +113,40 @@ hr {
 .card-info p {
     margin-top: 10px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+table {
+    width: 100%; /* Ajuste conforme necessário */
+    border-collapse: collapse; /* Para remover espaços entre as células */
+}
+
+
+td {
+    padding: 8px; /* Espaçamento interno das células */
+    border: 1px solid #ddd; /* Borda leve para as células */
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+
+.cabe{
+    background-color: rgba(54, 162, 235, 0.6);
+    color: white;
+    padding: 10px; 
+    text-align: left; 
+}

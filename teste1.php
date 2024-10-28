@@ -49,11 +49,12 @@ include 'header.php';
 
 
 <div class="container-fluid px-0">
-    <h1 class="text-center my-4">Pacientes</h1>
+    <h1 class="text-center my-4"></h1>
     <div class="container-fluid">
         <div class="row text-center mx-0">
+            <!-- Coluna 1: Triagem -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom">
+                <div class="card mb-3 shadow card-custom" onclick="toggleData('triagem')">
                     <div class="card-body">
                         <h5 class="card-title">
                             <i class="fa-solid fa-kit-medical icon-background"></i> Triagem
@@ -75,7 +76,7 @@ include 'header.php';
 
             <!-- Coluna 2: Recepção -->
             <div class="col-3">
-                <div class="card mb-3 shadow card-custom">
+                <div class="card mb-3 shadow card-custom" onclick="toggleData('recepcao')">
                     <div class="card-body">
                         <h5 class="card-title">
                             <i class="fa-solid fa-user-nurse icon-background"></i> Recepção
@@ -97,7 +98,7 @@ include 'header.php';
 
             <!-- Coluna 3: Clínica Médica -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom">
+                <div class="card mb-3 shadow card-custom" onclick="toggleData('clinica')">
                     <div class="card-body">
                         <h5 class="card-title">
                             <i class="fa-solid fa-user-doctor icon-background"></i> Clínica médica
@@ -137,7 +138,7 @@ include 'header.php';
 
             <!-- Coluna 4: Ortopedia -->
             <div class="col-3 text-small">
-                <div class="card mb-3 shadow card-custom">
+                <div class="card mb-3 shadow card-custom" onclick="toggleData('ortopedia')">
                     <div class="card-body">
                         <h5 class="card-title">
                             <i class="fa-solid fa-stethoscope icon-background"></i> Ortopedia
@@ -148,11 +149,11 @@ include 'header.php';
                                 <p class="card-text">1° Atendimento</p>
                                 <div class="d-flex justify-content-between">
                                     <div class="text-center">
-                                        <p class="number-large1">10</p>
+                                        <p class="number-large1">5</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
                                     <div class="text-center" style="margin-left: 15px;">
-                                        <p class="number-large1">18</p>
+                                        <p class="number-large1">15</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
@@ -161,11 +162,11 @@ include 'header.php';
                                 <p class="card-text">Reavaliação</p>
                                 <div class="d-flex justify-content-between">
                                     <div class="text-center">
-                                        <p class="number-large1">50</p>
+                                        <p class="number-large1">8</p>
                                         <p class="card-text-title">Paciente(s)</p>
                                     </div>
                                     <div class="text-center" style="margin-left: 15px;">
-                                        <p class="number-large1">25</p>
+                                        <p class="number-large1">20</p>
                                         <p class="card-text-title">Minutos</p>
                                     </div>
                                 </div>
@@ -175,18 +176,113 @@ include 'header.php';
                 </div>
             </div>
         </div>
+
+        <!-- Tabela Única -->
+        <div id="dataTable" class="table-container mt-4" style="display: none;">
+            <table class="table table-striped">
+                <thead>
+                    <tr class="cabe">
+                        <th>Chegada</th>
+                        <th>Marc</th>
+                        <th>Tmp</th>
+                        <th>Atd.</th>
+                        <th>Tmp</th>
+                        <th>Sit</th>
+                        <th>Nome</th>
+                        <th>Conv</th>
+                        <th>Pront</th>
+                        <th>SX</th>
+                        <th>ID</th>
+                        <th>Observação</th>
+                        <th>BIP/Senha</th>
+                        <th>Procedimento</th>
+                        <th>Responsável</th>
+                        <th>Anotações</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- As linhas da tabela serão preenchidas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<script>
+    const data = {
+        triagem: [
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:15', marc: '12349', tmp: 20, atd: 'Não', tmp2: 10, sit: 'Ativo', nome: 'Ana Souza', conv: 'Convênio E', pront: '123450', sx: 'Sim', id: 2, obs: 'Primeira consulta', bip: '5678', procedimento: 'Exame', responsavel: 'Dr. Maria', anotacoes: 'Notas adicionais' },
+            { chegada: '08:30', marc: '12350', tmp: 40, atd: 'Sim', tmp2: 25, sit: 'Ativo', nome: 'Pedro Almeida', conv: 'Convênio F', pront: '123451', sx: 'Não', id: 3, obs: 'Consulta de rotina', bip: '9101', procedimento: 'Check-up', responsavel: 'Dr. Ana', anotacoes: 'Sem observações' },
+        ],
+        recepcao: [
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:30', marc: '12346', tmp: 20, atd: 'Sim', tmp2: 10, sit: 'Ativo', nome: 'Maria Oliveira', conv: 'Convênio B', pront: '123457', sx: 'Sim', id: 4, obs: 'Sem observações', bip: '5678', procedimento: 'Consulta', responsavel: 'Dr. Ana', anotacoes: 'Notas adicionais' },
+            { chegada: '08:45', marc: '12352', tmp: 25, atd: 'Não', tmp2: 15, sit: 'Ativo', nome: 'Luiz Santos', conv: 'Convênio G', pront: '123458', sx: 'Não', id: 5, obs: 'Aguardando exames', bip: '1111', procedimento: 'Consulta', responsavel: 'Dr. Carlos', anotacoes: 'Aguardando retorno' },
+            { chegada: '09:00', marc: '12353', tmp: 30, atd: 'Sim', tmp2: 5, sit: 'Ativo', nome: 'Fernanda Costa', conv: 'Convênio H', pront: '123459', sx: 'Sim', id: 6, obs: 'Consulta urgente', bip: '2222', procedimento: 'Emergência', responsavel: 'Dr. João', anotacoes: 'Prioridade' },
+        ],
+        clinica: [
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '09:10', marc: '12354', tmp: 15, atd: 'Sim', tmp2: 10, sit: 'Ativo', nome: 'Carla Mendes', conv: 'Convênio C', pront: '123460', sx: 'Não', id: 7, obs: 'Reavaliação', bip: '3333', procedimento: 'Consulta', responsavel: 'Dr. Carla', anotacoes: 'Revisar exames' },
+            { chegada: '09:15', marc: '12355', tmp: 18, atd: 'Não', tmp2: 20, sit: 'Ativo', nome: 'Ricardo Lima', conv: 'Convênio I', pront: '123461', sx: 'Sim', id: 8, obs: 'Consulta de rotina', bip: '4444', procedimento: 'Check-up', responsavel: 'Dr. José', anotacoes: 'Sem observações' },
+            { chegada: '09:20', marc: '12356', tmp: 22, atd: 'Sim', tmp2: 8, sit: 'Ativo', nome: 'Juliana Torres', conv: 'Convênio J', pront: '123462', sx: 'Não', id: 9, obs: 'Sem observações', bip: '5555', procedimento: 'Consulta', responsavel: 'Dr. Ana', anotacoes: 'Aguardando exames' },
+        ],
+        ortopedia: [
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
+            { chegada: '09:25', marc: '12357', tmp: 10, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'Carlos Santos', conv: 'Convênio D', pront: '123463', sx: 'Sim', id: 10, obs: 'Consulta de retorno', bip: '6666', procedimento: 'Consulta', responsavel: 'Dr. Carla', anotacoes: 'Reavaliar tratamento' },
+            { chegada: '09:30', marc: '12358', tmp: 25, atd: 'Não', tmp2: 20, sit: 'Ativo', nome: 'Tatiane Lima', conv: 'Convênio K', pront: '123464', sx: 'Não', id: 11, obs: 'Reavaliação', bip: '7777', procedimento: 'Exame', responsavel: 'Dr. Carlos', anotacoes: 'Aguardando exames' },
+            { chegada: '09:35', marc: '12359', tmp: 30, atd: 'Sim', tmp2: 12, sit: 'Ativo', nome: 'Fernando Alves', conv: 'Convênio L', pront: '123465', sx: 'Sim', id: 12, obs: 'Consulta', bip: '8888', procedimento: 'Consulta', responsavel: 'Dr. João', anotacoes: 'Acompanhamento' },
+        ],
+    };
 
+    let currentVisibleTable = null;
 
+    function toggleData(card) {
+        const dataTable = document.getElementById('dataTable');
+        const tableBody = document.getElementById('tableBody');
 
+        // Limpa o conteúdo da tabela
+        tableBody.innerHTML = '';
 
+        // Adiciona as linhas ao corpo da tabela com base no card clicado
+        data[card].forEach(item => {
+            const row = `<tr>
+                <td>${item.chegada}</td>
+                <td>${item.marc}</td>
+                <td>${item.tmp}</td>
+                <td>${item.atd}</td>
+                <td>${item.tmp2}</td>
+                <td>${item.sit}</td>
+                <td>${item.nome}</td>
+                <td>${item.conv}</td>
+                <td>${item.pront}</td>
+                <td>${item.sx}</td>
+                <td>${item.id}</td>
+                <td>${item.obs}</td>
+                <td>${item.bip}</td>
+                <td>${item.procedimento}</td>
+                <td>${item.responsavel}</td>
+                <td>${item.anotacoes}</td>
+            </tr>`;
+            tableBody.innerHTML += row; // Adiciona a nova linha ao corpo da tabela
+        });
 
-
-
-
-
+        // Alterna a visibilidade da tabela
+        if (currentVisibleTable !== card) {
+            dataTable.style.display = 'block'; // Mostra a tabela
+            currentVisibleTable = card; // Atualiza a tabela atualmente visível
+        } else {
+            dataTable.style.display = 'none'; // Oculta a tabela se já estiver visível
+            currentVisibleTable = null; // Reseta a tabela atualmente visível
+        }
+    }
+</script>
 
 
 
@@ -390,7 +486,11 @@ ksort($prescricaoCounts);
 
 
 
-
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/dados.js"></script>
