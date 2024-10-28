@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DIETA PACIENTES</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/dados.css">
+    <link rel="stylesheet" href="css/teste1.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -16,205 +16,7 @@ include 'conexao.php';
 include 'header.php';
 
 
-function capitalizeFirstLetters($string) {
-    return ucwords(strtolower($string));
-}
 
-$totalPacientes = 0;
-$pacientesAlta = 0;
-$pacientesAdmissao = 0;
-
-try {
-    $hoursFilter = 12; 
-
-    if (isset($_POST['filter'])) {
-        switch ($_POST['filter']) {
-            case 'last6hours':
-                $hoursFilter = 6;
-                break;
-            case 'last12hours':
-                $hoursFilter = 12;
-                break;
-            case 'last24hours':
-                $hoursFilter = 24;
-                break;
-            default:
-                $hoursFilter = 24; 
-                break;
-        }
-    }
-
-    $query = "
-      SELECT 
-        'ADMISSAO' AS TIPO,
-        HSP.HSP_NUM AS 'IH',
-        HSP.HSP_DTHRE AS 'DATA_EVENTO',
-        HSP.HSP_PAC AS 'REGISTRO',
-        PAC.PAC_NOME AS 'PACIENTE',
-        CASE
-            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
-                THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
-            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
-                THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
-        END AS 'IDADE',
-        CNV.CNV_NOME AS 'CONVENIO',
-        RTRIM(STR.STR_NOME) AS 'UNIDADE',
-        LOC.LOC_NOME AS 'LEITO',
-        ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
-        ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-        PSC.PSC_OBS AS 'OBS',
-        DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
-    FROM
-        HSP
-    INNER JOIN LOC ON HSP_LOC = LOC_COD
-    INNER JOIN STR ON STR_COD = LOC_STR
-    INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
-    INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
-    LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
-    LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
-    WHERE
-        HSP_TRAT_INT = 'I'
-        AND HSP_STAT = 'A'
-        AND PSC.PSC_STAT <> 'S'
-    ";
-
-    if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
-    }
-
-    $query .= "
-        UNION ALL
-
-        SELECT 
-            'ALTA' AS TIPO,
-            HSP.HSP_NUM AS 'IH',
-            HSP.HSP_DTHRA AS 'DATA_EVENTO',
-            HSP.HSP_PAC AS 'REGISTRO',
-            PAC.PAC_NOME AS 'PACIENTE',
-            CASE
-                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
-                    THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
-                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
-                    THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
-            END AS 'IDADE',
-            CNV.CNV_NOME AS 'CONVENIO',
-            RTRIM(STR.STR_NOME) AS 'UNIDADE',
-            LOC.LOC_NOME AS 'LEITO',
-            ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
-            ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-            PSC.PSC_OBS AS 'OBS',
-            DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
-        FROM
-            HSP
-        INNER JOIN LOC ON HSP_LOC = LOC_COD
-        INNER JOIN STR ON STR_COD = LOC_STR
-        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
-        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
-        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
-        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
-        WHERE
-            HSP_TRAT_INT = 'I'
-            AND HSP_STAT = 'E'
-    ";
-
-    if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
-    }
-
-    $query .= " ORDER BY DATA_EVENTO DESC;"; 
-
-    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
-
-    $groupedPatients = [];
-
-    if (count($result) > 0) {
-        $previousStates = []; 
-        
-        foreach ($result as $row) {
-            $patientName = capitalizeFirstLetters($row['PACIENTE']);
-            $convenio = capitalizeFirstLetters($row['CONVENIO']);
-            $leito = capitalizeFirstLetters($row['LEITO']);
-            $unidade = capitalizeFirstLetters($row['UNIDADE']);
-            $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
-            $idade = $row['IDADE'];
-            $tipo = $row['TIPO'];
-            $registro = $row['REGISTRO']; 
-            if (!isset($groupedPatients[$registro])) {
-                $totalPacientes++;
-                
-                if ($tipo === 'ALTA') {
-                    $pacientesAlta++;
-                } else if ($tipo === 'ADMISSAO') {
-                    $pacientesAdmissao++;
-                }
-                
-                $groupedPatients[$registro] = [
-                    'REGISTRO' => $registro,
-                    'PACIENTE' => $patientName,
-                    'CONVENIO' => $convenio,
-                    'UNIDADE' => $unidade,
-                    'LEITO' => $leito,
-                    'PRESCRICAO' => $prescricao,
-                    'DIETAS' => [],
-                    'OBS' => [],
-                    'ADMISSÃO' => $admissao,
-                    'IDADE' => $idade,
-                    'TIPO' => $tipo
-                ];
-            } else {
-                if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
-                    echo "<script>showNotification('$patientName');</script>";
-                }
-            }
-            $previousStates[$registro] = $tipo;
-
-            if (!empty($row['DIETA'])) {
-                $dietName = capitalizeFirstLetters($row['DIETA']);
-                if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
-                    $groupedPatients[$registro]['DIETAS'][] = $dietName;
-                }
-            }
-
-            if (!empty($row['OBS'])) {
-                $obsText = capitalizeFirstLetters($row['OBS']);
-                if (!in_array($obsText, $groupedPatients[$registro]['OBS'])) {
-                    $groupedPatients[$registro]['OBS'][] = $obsText;
-                }
-            }
-        }
-        $groupedPatients = array_values($groupedPatients);
-    }
-        $queryLeitos = "
-        SELECT 
-            LOC.LOC_NOME AS 'LEITO',
-            COUNT(HSP.HSP_NUM) AS 'QUANTIDADE_PACIENTES'
-        FROM
-            HSP
-        INNER JOIN LOC ON HSP_LOC = LOC_COD
-        WHERE
-            HSP_TRAT_INT = 'I'
-            AND HSP_STAT = 'A'
-        GROUP BY
-            LOC.LOC_NOME
-        ORDER BY
-            LOC.LOC_NOME;
-        ";
-
-        $resultLeitos = $connection->query($queryLeitos)->fetchAll(PDO::FETCH_ASSOC);
-        $leitos = [];
-        $quantidadePacientes = [];
-
-        if (count($resultLeitos) > 0) {
-        foreach ($resultLeitos as $row) {
-            $leitos[] = $row['LEITO'];
-            $quantidadePacientes[] = $row['QUANTIDADE_PACIENTES'];
-        }
-        }
-        
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage();
-}
 ?>
 
 <a href="index.php" class="custom-link">
@@ -223,161 +25,169 @@ try {
 </a>
 
 
-<div class="container">
+<div class="container-fluid px-0">
     <h1 class="text-center my-4">Pacientes</h1>
-
-    <form method="POST" action="" class="mb-4">
-        <div class="input-group">
-            <label class="input-group-text" for="filter">Filtrar por horas:</label>
-            <select name="filter" id="filter" class="form-select">
-                <option value="">Selecione um horário</option>
-                <option value="last24hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last24hours') ? 'selected' : ''; ?>>Últimas 24 horas</option>
-                <option value="last12hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last12hours') ? 'selected' : ''; ?>>Últimas 12 horas</option>
-                <option value="last6hours" <?php echo (isset($_POST['filter']) && $_POST['filter'] == 'last6hours') ? 'selected' : ''; ?>>Últimas 6 horas</option>
-            </select>
-            <button class="btn btn-primary" type="submit">Filtrar</button>
-        </div>
-    </form>
-
     <style>
-    .card-custom {
-        background-color: #28a745; /* Cor verde */
-        color: white; /* Texto branco */
-    }
-    .card-custom h5, .card-custom .card-text-title {
-        color: white;
-    }
-    .card-custom .number-large {
-        font-size: 1.5em; /* Aumenta o tamanho do número */
-        font-weight: bold;
-    }
-    .icon-background {
-        color: white;
-    }
-</style>
+        /* Ajusta o container principal para ocupar toda a tela */
+        .container-fluid {
+            max-width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
 
-<div class="container-fluid">
-    <div class="row text-center">
-        <!-- Triagem -->
-        <div class="col-3 ">
-            <div class="card mb-4 shadow card-custom">
-                <div class="card-body">
-                    <h5 class="card-title">Triagem</h5>
-                    <hr>
-                    <i class="fa-solid fa-notes-medical icon-background"></i>
+        /* Ajustes específicos para os cards */
+        .card-custom {
+            background-color: #28a745; /* Cor verde */
+            color: white; /* Texto branco */
+            min-height: 200px; /* Altura mínima */
+            width: 100%; /* Ocupa a largura total da coluna */
+        }
 
-                    <!-- Paciente e Minutos lado a lado -->
-                    <div class="d-flex justify-content-between mt-2">
-                        <div>
-                            <p class="number-large">15</p>
-                            <p class="card-text-title">Paciente</p>
-                        </div>
-                        <div>  
-                            <p class="number-large">45</p>
-                            <p class="card-text-title">Minuto(s)</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        /* Demais ajustes nos estilos dos cards */
+        .card-custom .card-body {
+            padding: 10px; /* Padding interno */
+        }
+        .card-custom h5, .card-custom .card-text-title {
+            color: white;
+            margin-bottom: 5px; /* Margem inferior */
+        }
+        .card-custom .number-large {
+            font-size: 1.3em; /* Ajuste do tamanho do número */
+            font-weight: bold;
+            margin-bottom: 0; /* Remoção de margem inferior */
+        }
+        .icon-background {
+            color: white;
+            font-size: 1.8em; /* Tamanho do ícone */
+        }
+        .card-custom .d-flex > div {
+            margin: 0; /* Remove margem entre os itens */
+        }
+        hr {
+            margin: 5px 0; /* Margem superior e inferior */
+        }
+        /* Estilo específico para diminuir o tamanho do texto nos últimos dois cards */
+        .text-small p,
+        .text-small .card-title {
+            font-size: 0.9em; /* Tamanho do texto */
+        }
+    </style>
 
-        <!-- Recepção -->
-        <div class="col-3">
-            <div class="card mb-4 shadow card-custom">
-                <div class="card-body">
-                    <h5 class="card-title">Recepção</h5>
-                    <hr>
-                    <i class="fa-solid fa-user-check icon-background"></i>
-
-                    <!-- Quantidade e Minutos lado a lado -->
-                    <div class="d-flex justify-content-between mt-3">
-                        <div>
-                            <p class="number-large">20</p>
-                            <p class="card-text-title">Quantidade</p>
-                        </div>
-                        <div>
-                            <p class="number-large">30</p>
-                            <p class="card-text-title">Minuto(s)</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Clínica Médica -->
-        <div class="col-3">
-            <div class="card mb-4 shadow card-custom">
-                <div class="card-body">
-                    <h5 class="card-title">Clínica Médica</h5>
-                    <hr>
-                    <i class="fa-solid fa-stethoscope icon-background"></i>
-
-                    <!-- Atendimento e Reavaliação lado a lado -->
-                    <div class="d-flex justify-content-between mt-3">
-                        <div>
-                            <p class="card-text"><strong>Atendimento:</strong></p>
-                            <div class="d-flex justify-content-between">
-                                <div class="text-center"> 
-                                    <p class="number-large">10</p>
-                                    <p class="card-text-title">Quantidade</p>
-                                </div>
-                                <div class="text-center"> 
-                                    <p class="number-large">60</p>
-                                    <p class="card-text-title">Minuto(s)</p>
-                                </div>
+    <div class="container-fluid">
+        <div class="row text-center d-flex align-items-stretch mx-0">
+            <!-- Coluna 1: Triagem -->
+            <div class="col-2 d-flex">
+                <div class="card mb-3 shadow card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title">Triagem</h5>
+                        <hr>
+                        <i class="fa-solid fa-notes-medical icon-background"></i>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div>
+                                <p class="number-large">15</p>
+                                <p class="card-text-title">Paciente</p>
                             </div>
-                        </div>
-                        <div>
-                            <p class="card-text"><strong>Reavaliação:</strong></p>
-                            <div class="d-flex justify-content-between">
-                                <div class="text-center"> 
-                                    <p class="number-large">5</p>
-                                    <p class="card-text-title">Quantidade</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="number-large">25</p>
-                                    <p class="card-text-title">Minuto(s)</p>
-                                </div>
+                            <div>  
+                                <p class="number-large">45</p>
+                                <p class="card-text-title">Minuto(s)</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Ortopedia -->
-        <div class="col-3">
-            <div class="card mb-4 shadow card-custom">
-                <div class="card-body">
-                    <h5 class="card-title">Ortopedia</h5>
-                    <hr>
-                    <i class="fa-solid fa-stethoscope icon-background"></i>
+            <!-- Coluna 2: Recepção -->
+            <div class="col-2 d-flex">
+                <div class="card mb-3 shadow card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title">Recepção</h5>
+                        <hr>
+                        <i class="fa-solid fa-user-check icon-background"></i>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div>
+                                <p class="number-large">20</p>
+                                <p class="card-text-title">Quantidade</p>
+                            </div>
+                            <div>
+                                <p class="number-large">30</p>
+                                <p class="card-text-title">Minuto(s)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Atendimento e Reavaliação lado a lado -->
-                    <div class="d-flex justify-content-between mt-3">
-                        <div>
-                            <p class="card-text"><strong>Atendimento:</strong></p>
-                            <div class="d-flex justify-content-between">
-                                <div class="text-center">
-                                    <p class="number-large">10</p>
-                                    <p class="card-text-title">Quantidade</p>
+            <!-- Coluna 3: Clínica Médica -->
+            <div class="col-4 d-flex text-small">
+                <div class="card mb-3 shadow card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title">Clínica Médica</h5>
+                        <hr>
+                        <i class="fa-solid fa-stethoscope icon-background"></i>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div>
+                                <p class="card-text"><strong>Atendimento:</strong></p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="text-center"> 
+                                        <p class="number-large">10</p>
+                                        <p class="card-text-title">Quantidade</p>
+                                    </div>
+                                    <div class="text-center"> 
+                                        <p class="number-large">60</p>
+                                        <p class="card-text-title">Minuto(s)</p>
+                                    </div>
                                 </div>
-                                <div class="text-center"> 
-                                    <p class="number-large">18</p>
-                                    <p class="card-text-title">Minutos</p>
+                            </div>
+                            <div>
+                                <p class="card-text"><strong>Reavaliação:</strong></p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="text-center"> 
+                                        <p class="number-large">5</p>
+                                        <p class="card-text-title">Quantidade</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="number-large">25</p>
+                                        <p class="card-text-title">Minuto(s)</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <p class="card-text"><strong>Reavaliação:</strong></p>
-                            <div class="d-flex justify-content-between">
-                                <div class="text-center">
-                                    <p class="number-large">50</p>
-                                    <p class="card-text-title">Quantidade</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna 4: Ortopedia -->
+            <div class="col-4 d-flex text-small">
+                <div class="card mb-3 shadow card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title">Ortopedia</h5>
+                        <hr>
+                        <i class="fa-solid fa-stethoscope icon-background"></i>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div>
+                                <p class="card-text"><strong>Atendimento:</strong></p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="text-center">
+                                        <p class="number-large">10</p>
+                                        <p class="card-text-title">Paciente(s)</p>
+                                    </div>
+                                    <div class="text-center"> 
+                                        <p class="number-large">18</p>
+                                        <p class="card-text-title">Minutos</p>
+                                    </div>
                                 </div>
-                                <div class="text-center">
-                                    <p class="number-large">25</p>
-                                    <p class="card-text-title">Minutos</p>
+                            </div>
+                            <div>
+                                <p class="card-text"><strong>Reavaliação:</strong></p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="text-center">
+                                        <p class="number-large">50</p>
+                                        <p class="card-text-title">Paciente(s)</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="number-large">25</p>
+                                        <p class="card-text-title">Minutos</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -389,49 +199,34 @@ try {
 </div>
 
 
-</div>
-
 
 
 <?php
+// Valores estáticos para os gráficos
+$leitoCounts = [
+    'Leito 1' => 10,
+    'Leito 2' => 15,
+    'Leito 3' => 8,
+    'Leito 4' => 20,
+];
 
-$leitoCounts = [];
-foreach ($groupedPatients as $patient) {
-    $leito = $patient['LEITO'];
+$convênioCounts = [
+    'Convenio A' => 12,
+    'Convenio B' => 22,
+    'Convenio C' => 18,
+];
 
-    if (!isset($leitoCounts[$leito])) {
-        $leitoCounts[$leito] = 0;
-    }
-    $leitoCounts[$leito]++;
-}
+$unidadeCounts = [
+    'Unidade X' => 5,
+    'Unidade Y' => 10,
+    'Unidade Z' => 15,
+];
 
-$convênioCounts = [];
-foreach ($groupedPatients as $patient) {
-    $convenio = $patient['CONVENIO'];
-
-    if (!isset($convênioCounts[$convenio])) {
-        $convênioCounts[$convenio] = 0;
-    }
-    $convênioCounts[$convenio]++;
-}
-$unidadeCounts = [];
-foreach ($groupedPatients as $patient) {
-    $unidade = $patient['UNIDADE'];
-
-    if (!isset($unidadeCounts[$unidade])) {
-        $unidadeCounts[$unidade] = 0;
-    }
-    $unidadeCounts[$unidade]++;
-}
-$prescricaoCounts = [];
-foreach ($groupedPatients as $patient) {
-    $prescricao = $patient['PRESCRICAO'];
-
-    if (!isset($prescricaoCounts[$prescricao])) {
-        $prescricaoCounts[$prescricao] = 0;
-    }
-    $prescricaoCounts[$prescricao]++;
-}
+$prescricaoCounts = [
+    'Prescricao 1' => 14,
+    'Prescricao 2' => 6,
+    'Prescricao 3' => 11,
+];
 
 ksort($leitoCounts);
 ksort($convênioCounts);
@@ -466,22 +261,24 @@ ksort($prescricaoCounts);
 
     <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-        const leitos = <?php echo json_encode(array_keys($leitoCounts)); ?>;
-        const countsByLeito = <?php echo json_encode(array_values($leitoCounts)); ?>;
+        // Dados estáticos para os gráficos
+        const leitos = ['Leito 1', 'Leito 2', 'Leito 3', 'Leito 4'];
+        const countsByLeito = [10, 15, 8, 20];
 
-        const convenios = <?php echo json_encode(array_keys($convênioCounts)); ?>;
-        const countsByConvenio = <?php echo json_encode(array_values($convênioCounts)); ?>;
+        const convenios = ['Convenio A', 'Convenio B', 'Convenio C'];
+        const countsByConvenio = [12, 22, 18];
 
-        const unidades = <?php echo json_encode(array_keys($unidadeCounts)); ?>;
-        const countsByUnidade = <?php echo json_encode(array_values($unidadeCounts)); ?>;
+        const unidades = ['Unidade X', 'Unidade Y', 'Unidade Z'];
+        const countsByUnidade = [5, 10, 15];
 
-        const prescricoes = <?php echo json_encode(array_keys($prescricaoCounts)); ?>;
-        const countsByPrescricao = <?php echo json_encode(array_values($prescricaoCounts)); ?>;
+        const prescricoes = ['Prescricao 1', 'Prescricao 2', 'Prescricao 3'];
+        const countsByPrescricao = [14, 6, 11];
 
         const barCtx = document.getElementById('barChart').getContext('2d');
         const lineCtx = document.getElementById('lineChart').getContext('2d');
         const unitBarCtx = document.getElementById('unitBarChart').getContext('2d');
         const prescriptionCtx = document.getElementById('prescriptionChart').getContext('2d');
+        
         const colors = [
             'rgba(54, 162, 235, 0.6)',
             'rgba(255, 99, 132, 0.6)',
@@ -491,6 +288,7 @@ ksort($prescricaoCounts);
             'rgba(255, 159, 64, 0.6)',
             'rgba(201, 203, 207, 0.6)'
         ];
+
         const barChart = new Chart(barCtx, {
             type: 'bar',
             data: {
@@ -511,6 +309,7 @@ ksort($prescricaoCounts);
                 }
             }
         });
+
         const lineChart = new Chart(lineCtx, {
             type: 'line',
             data: {
@@ -531,6 +330,7 @@ ksort($prescricaoCounts);
                 }
             }
         });
+
         const unitBarChart = new Chart(unitBarCtx, {
             type: 'bar',
             data: {
@@ -551,6 +351,7 @@ ksort($prescricaoCounts);
                 }
             }
         });
+
         const prescriptionChart = new Chart(prescriptionCtx, {
             type: 'line', 
             data: {
@@ -582,7 +383,6 @@ ksort($prescricaoCounts);
 <?php endif; ?>
 
 
-
 <script>
     setInterval(updateCurrentTime, 1000);
     updateCurrentTime();
@@ -601,4 +401,3 @@ ksort($prescricaoCounts);
 <script src="js/dados.js"></script>
 </body>
 </html>
-
