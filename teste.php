@@ -244,44 +244,58 @@ include 'header.php';
     let currentVisibleTable = null;
 
     function toggleData(card) {
-        const dataTable = document.getElementById('dataTable');
-        const tableBody = document.getElementById('tableBody');
+    const dataTable = document.getElementById('dataTable');
+    const tableBody = document.getElementById('tableBody');
 
-        // Limpa o conteúdo da tabela
-        tableBody.innerHTML = '';
+    // Limpa o conteúdo da tabela
+    tableBody.innerHTML = '';
 
-        // Adiciona as linhas ao corpo da tabela com base no card clicado
-        data[card].forEach(item => {
-            const row = `<tr>
-                <td>${item.chegada}</td>
-                <td>${item.marc}</td>
-                <td>${item.tmp}</td>
-                <td>${item.atd}</td>
-                <td>${item.tmp2}</td>
-                <td>${item.sit}</td>
-                <td>${item.nome}</td>
-                <td>${item.conv}</td>
-                <td>${item.pront}</td>
-                <td>${item.sx}</td>
-                <td>${item.id}</td>
-                <td>${item.obs}</td>
-                <td>${item.bip}</td>
-                <td>${item.procedimento}</td>
-                <td>${item.responsavel}</td>
-                <td>${item.anotacoes}</td>
-            </tr>`;
-            tableBody.innerHTML += row; // Adiciona a nova linha ao corpo da tabela
-        });
+    // Adiciona as linhas ao corpo da tabela com base no card clicado
+    data[card].forEach(item => {
+        const sitContent = item.sit === 'Ativo' ? '<span class="status-dot"></span>' : item.sit;
 
-        // Alterna a visibilidade da tabela
-        if (currentVisibleTable !== card) {
-            dataTable.style.display = 'block'; // Mostra a tabela
-            currentVisibleTable = card; // Atualiza a tabela atualmente visível
-        } else {
-            dataTable.style.display = 'none'; // Oculta a tabela se já estiver visível
-            currentVisibleTable = null; // Reseta a tabela atualmente visível
-        }
+        // Definindo a cor do BIP com base em condições (exemplo)
+        let bipColorClass = 'status-dot-blue'; // Padrão para azul
+        if (item.bip === '1234') bipColorClass = 'status-dot-green';
+        else if (item.bip === '5678') bipColorClass = 'status-dot-yellow';
+
+        const bipContent = `<span class="${bipColorClass}"></span>${item.bip}`;
+
+        // Define a cor de fundo da coluna Procedimento com base no estado
+        const procedimentoAtivo = item.sit === 'Ativo';
+        let procedimentoBgClass = procedimentoAtivo ? 'procedimento-ativo' : 'procedimento-inativo';
+
+        // Coloca o conteúdo na linha da tabela
+        const row = `<tr>
+            <td>${item.chegada}</td>
+            <td>${item.marc}</td>
+            <td>${item.tmp}</td>
+            <td>${item.atd}</td>
+            <td>${item.tmp2}</td>
+            <td class="sit-column">${sitContent}</td>
+            <td>${item.nome}</td>
+            <td>${item.conv}</td>
+            <td>${item.pront}</td>
+            <td>${item.sx}</td>
+            <td>${item.id}</td>
+            <td>${item.obs}</td>
+            <td class="bip-column">${bipContent}</td> <!-- Coluna BIP/Senha com bolinha e senha -->
+            <td class="${procedimentoBgClass}">${item.procedimento}</td> <!-- Classe de fundo para o procedimento -->
+            <td>${item.responsavel}</td>
+            <td>${item.anotacoes}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    // Alterna a visibilidade da tabela
+    if (currentVisibleTable !== card) {
+        dataTable.style.display = 'block'; 
+        currentVisibleTable = card; 
+    } else {
+        dataTable.style.display = 'none'; 
+        currentVisibleTable = null; 
     }
+}
 </script>
 
 

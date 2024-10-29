@@ -179,66 +179,41 @@ include 'header.php';
 
         <!-- Tabela Única -->
         <div id="dataTable" class="table-container mt-4" style="display: none;">
-            <table class="table table-striped">
-                <thead>
-                    <tr class="cabe">
-                        <th>Chegada</th>
-                        <th>Marc</th>
-                        <th>Tmp</th>
-                        <th>Atd.</th>
-                        <th>Tmp</th>
-                        <th>Sit</th>
-                        <th>Nome</th>
-                        <th>Conv</th>
-                        <th>Pront</th>
-                        <th>SX</th>
-                        <th>ID</th>
-                        <th>Observação</th>
-                        <th>BIP/Senha</th>
-                        <th>Procedimento</th>
-                        <th>Responsável</th>
-                        <th>Anotações</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- As linhas da tabela serão preenchidas dinamicamente -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr class="cabe">
+                <th>Chegada</th>
+                <th>Marc</th>
+                <th>Tmp</th>
+                <th>Atd.</th>
+                <th>Tmp</th>
+                <th>Sit</th>
+                <th>Nome</th>
+                <th>Conv</th>
+                <th>Pront</th>
+                <th>SX</th>
+                <th>ID</th>
+                <th>Observação</th>
+                <th>BIP/Senha</th>
+                <th>Procedimento</th>
+                <th>Responsável</th>
+                <th>Anotações</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- As linhas da tabela serão preenchidas dinamicamente -->
+        </tbody>
+    </table>
 </div>
 
 <script>
     const data = {
         triagem: [
             { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
             { chegada: '08:15', marc: '12349', tmp: 20, atd: 'Não', tmp2: 10, sit: 'Ativo', nome: 'Ana Souza', conv: 'Convênio E', pront: '123450', sx: 'Sim', id: 2, obs: 'Primeira consulta', bip: '5678', procedimento: 'Exame', responsavel: 'Dr. Maria', anotacoes: 'Notas adicionais' },
-            { chegada: '08:30', marc: '12350', tmp: 40, atd: 'Sim', tmp2: 25, sit: 'Ativo', nome: 'Pedro Almeida', conv: 'Convênio F', pront: '123451', sx: 'Não', id: 3, obs: 'Consulta de rotina', bip: '9101', procedimento: 'Check-up', responsavel: 'Dr. Ana', anotacoes: 'Sem observações' },
+            // Adicione mais dados conforme necessário...
         ],
-        recepcao: [
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:30', marc: '12346', tmp: 20, atd: 'Sim', tmp2: 10, sit: 'Ativo', nome: 'Maria Oliveira', conv: 'Convênio B', pront: '123457', sx: 'Sim', id: 4, obs: 'Sem observações', bip: '5678', procedimento: 'Consulta', responsavel: 'Dr. Ana', anotacoes: 'Notas adicionais' },
-            { chegada: '08:45', marc: '12352', tmp: 25, atd: 'Não', tmp2: 15, sit: 'Ativo', nome: 'Luiz Santos', conv: 'Convênio G', pront: '123458', sx: 'Não', id: 5, obs: 'Aguardando exames', bip: '1111', procedimento: 'Consulta', responsavel: 'Dr. Carlos', anotacoes: 'Aguardando retorno' },
-            { chegada: '09:00', marc: '12353', tmp: 30, atd: 'Sim', tmp2: 5, sit: 'Ativo', nome: 'Fernanda Costa', conv: 'Convênio H', pront: '123459', sx: 'Sim', id: 6, obs: 'Consulta urgente', bip: '2222', procedimento: 'Emergência', responsavel: 'Dr. João', anotacoes: 'Prioridade' },
-        ],
-        clinica: [
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '09:10', marc: '12354', tmp: 15, atd: 'Sim', tmp2: 10, sit: 'Ativo', nome: 'Carla Mendes', conv: 'Convênio C', pront: '123460', sx: 'Não', id: 7, obs: 'Reavaliação', bip: '3333', procedimento: 'Consulta', responsavel: 'Dr. Carla', anotacoes: 'Revisar exames' },
-            { chegada: '09:15', marc: '12355', tmp: 18, atd: 'Não', tmp2: 20, sit: 'Ativo', nome: 'Ricardo Lima', conv: 'Convênio I', pront: '123461', sx: 'Sim', id: 8, obs: 'Consulta de rotina', bip: '4444', procedimento: 'Check-up', responsavel: 'Dr. José', anotacoes: 'Sem observações' },
-            { chegada: '09:20', marc: '12356', tmp: 22, atd: 'Sim', tmp2: 8, sit: 'Ativo', nome: 'Juliana Torres', conv: 'Convênio J', pront: '123462', sx: 'Não', id: 9, obs: 'Sem observações', bip: '5555', procedimento: 'Consulta', responsavel: 'Dr. Ana', anotacoes: 'Aguardando exames' },
-        ],
-        ortopedia: [
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '08:00', marc: '12345', tmp: 30, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'João da Silva', conv: 'Convênio A', pront: '123456', sx: 'Não', id: 1, obs: 'Sem observações', bip: '1234', procedimento: 'Consulta', responsavel: 'Dr. José', anotacoes: 'Sem anotações' },
-            { chegada: '09:25', marc: '12357', tmp: 10, atd: 'Sim', tmp2: 15, sit: 'Ativo', nome: 'Carlos Santos', conv: 'Convênio D', pront: '123463', sx: 'Sim', id: 10, obs: 'Consulta de retorno', bip: '6666', procedimento: 'Consulta', responsavel: 'Dr. Carla', anotacoes: 'Reavaliar tratamento' },
-            { chegada: '09:30', marc: '12358', tmp: 25, atd: 'Não', tmp2: 20, sit: 'Ativo', nome: 'Tatiane Lima', conv: 'Convênio K', pront: '123464', sx: 'Não', id: 11, obs: 'Reavaliação', bip: '7777', procedimento: 'Exame', responsavel: 'Dr. Carlos', anotacoes: 'Aguardando exames' },
-            { chegada: '09:35', marc: '12359', tmp: 30, atd: 'Sim', tmp2: 12, sit: 'Ativo', nome: 'Fernando Alves', conv: 'Convênio L', pront: '123465', sx: 'Sim', id: 12, obs: 'Consulta', bip: '8888', procedimento: 'Consulta', responsavel: 'Dr. João', anotacoes: 'Acompanhamento' },
-        ],
+        // Adicione outros conjuntos de dados como 'recepcao', 'clinica', 'ortopedia', etc.
     };
 
     let currentVisibleTable = null;
@@ -252,13 +227,14 @@ include 'header.php';
 
         // Adiciona as linhas ao corpo da tabela com base no card clicado
         data[card].forEach(item => {
+            const sitContent = item.sit === 'Ativo' ? '<span class="status-dot"></span>' : item.sit;
             const row = `<tr>
                 <td>${item.chegada}</td>
                 <td>${item.marc}</td>
                 <td>${item.tmp}</td>
                 <td>${item.atd}</td>
                 <td>${item.tmp2}</td>
-                <td>${item.sit}</td>
+                <td>${sitContent}</td>
                 <td>${item.nome}</td>
                 <td>${item.conv}</td>
                 <td>${item.pront}</td>
@@ -270,8 +246,9 @@ include 'header.php';
                 <td>${item.responsavel}</td>
                 <td>${item.anotacoes}</td>
             </tr>`;
-            tableBody.innerHTML += row; // Adiciona a nova linha ao corpo da tabela
+            tableBody.innerHTML += row;
         });
+
 
         // Alterna a visibilidade da tabela
         if (currentVisibleTable !== card) {
@@ -279,16 +256,26 @@ include 'header.php';
             currentVisibleTable = card; // Atualiza a tabela atualmente visível
         } else {
             dataTable.style.display = 'none'; // Oculta a tabela se já estiver visível
-            currentVisibleTable = null; // Reseta a tabela atualmente visível
+            currentVisibleTable = null; // Reseta a tabela visível
         }
     }
+
+    // Exemplo de como chamar a função toggleData
+    // toggleData('triagem'); // Para abrir a tabela de triagem
 </script>
 
 
 
 
-
-
+<style>
+    .status-dot {
+    height: 10px;
+    width: 10px;
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+}
+</style>
 
 
 

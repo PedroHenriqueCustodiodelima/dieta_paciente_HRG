@@ -150,3 +150,51 @@ tr:nth-child(even) {
     padding: 10px; 
     text-align: left; 
 }
+.status-dot {
+    height: 10px;
+    width: 10px;
+    background-color: #39FF14; /* Verde neon */
+    border-radius: 50%;
+    display: inline-block;
+    
+}
+.table td.sit-column {
+    text-align: center;
+    vertical-align: middle;
+}
+.status-dot-blue {
+    height: 10px;
+    width: 10px;
+    background-color: #00f; /* Azul */
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.status-dot-green {
+    height: 10px;
+    width: 10px;
+    background-color: #39FF14; /* Verde Neon */
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.status-dot-yellow {
+    height: 10px;
+    width: 10px;
+    background-color: #FFDD00; /* Amarelo */
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+.procedimento-ativo {
+    background-color: green;
+    color: white;
+}
+
+.procedimento-inativo {
+    background-color: gray;
+    color: white;
+}
+
