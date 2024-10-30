@@ -1,99 +1,113 @@
-<?php
-// Simulando dados para a tabela com todos os procedimentos em cada linha
-$data = [
-    ['08:00', '12345', 30, '233', 15, 'Ativo', 'João da Silva', 'Convênio A', '123456', 'Não', 1, 'Sem observações', '1234', 'Dr. José', 'Sem anotações'],
-    ['08:15', '12349', 20, '233', 10, 'Ativo', 'Ana Souza', 'Convênio E', '123450', 'Sim', 2, 'Primeira consulta', '5678', 'Dr. Maria', 'Notas adicionais'],
-    ['08:30', '12350', 40, '233', 25, 'Ativo', 'Pedro Almeida', 'Convênio F', '123451', 'Não', 3, 'Consulta de rotina', '9101', 'Dr. Ana', 'Sem observações'],
-    // Adicionando mais 10 linhas com todos os procedimentos
-];
 
-$procedimentos = ['TRIA', 'LAB', 'RX', 'US', 'TC'];
-?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabela de Atendimento</title>
-    <link rel="stylesheet" href="css/teste1.css">
-    <style>
-        .background-tria {
-            background-color: green;
-            color: white; /* Para melhor legibilidade */
-            padding: 2px 5px; /* Para espaçamento */
-        }
-        .background-lab,
-        .background-rx,
-        .background-us,
-        .background-tc {
-            background-color: gray;
-            color: white; /* Para melhor legibilidade */
-            padding: 2px 5px; /* Para espaçamento */
-        }
-    </style>
+    <link rel="stylesheet" href="css/teste1.css"> 
 </head>
 <body>
+<?php
+include 'conexao1.php'; // Certifique-se de que o caminho está correto
+include 'header.php';
+$con = new Conexao();
 
-<div class="table-container">
-    <table class="table">
-        <thead>
-            <tr class="cabe">
-                <th>Chegada</th>
-                <th>Marc</th>
-                <th>Tmp</th>
-                <th>Atd.</th>
-                <th>Tmp</th>
-                <th>Sit.</th>
-                <th>Nome</th>
-                <th>Conv.</th>
-                <th>Pront.</th>
-                <th>SX</th>
-                <th>ID</th>
-                <th>Observação</th>
-                <th>BIP/Senha</th>
-                <th>Responsável</th> <!-- Responsável aqui -->
-                <th>Anotações</th> <!-- Anotações aqui -->
-                <th>Procedimentos</th> <!-- Procedimentos aqui -->
-            </tr>
-        </thead>
-        <tbody>
-    <?php foreach ($data as $row): ?>
+// Sua consulta SQL
+$query = "
+    SELECT 
+        FLE.FLE_DTHR_CHEGADA AS 'FILA - CHEGADA',
+        DATEDIFF(MINUTE, FLE.FLE_DTHR_CHEGADA, GETDATE()) AS TEMPO_ESPERA,
+        FLE.FLE_DTHR_ATENDIMENTO AS 'FILA - ATD',
+        FLE.FLE_COR AS 'FILA - CR',
+        FLE.FLE_STATUS AS 'FILA - STATUS DE ATENDIMENTO CÓDIGO',
+        CASE 
+            WHEN FLE.FLE_STATUS = 'P' THEN 'Em Procedimento'
+            WHEN FLE.FLE_STATUS = 'A' THEN 'Aguardando'
+            WHEN FLE.FLE_STATUS = 'X' THEN 'Concluído'
+            WHEN FLE.FLE_STATUS = 'E' THEN 'Em Atendimento'
+        END AS 'FILA - STATUS DE ATENDIMENTO NOME',
+        PSV.PSV_COD AS 'FILA CÓDIGO',
+        PSV.PSV_NOME AS 'FILA NOME',
+        PAC.PAC_REG AS 'PACIENTE REGISTRO',
+        PAC.PAC_NOME AS 'PACIENTE NOME',
+        RCL.RCL_COD AS 'CONSULTA CÓDIGO',
+        RCL.RCL_DTHR AS 'CONSULTA DATA/HORA LANÇAMENTO',
+        RCL.RCL_MED AS 'CONSULTA MÉDICO',
+        CNV.CNV_COD AS 'CÓDIGO CONVENIO', 
+        CNV.CNV_NOME AS 'NOME CONVÊNIO'
+    FROM 
+        FLE 
+    INNER JOIN PSV ON FLE.FLE_PSV_COD = PSV.PSV_COD 
+    INNER JOIN PAC ON PAC.PAC_REG = FLE.FLE_PAC_REG
+    LEFT JOIN HSP ON FLE.FLE_DTHR_CHEGADA BETWEEN HSP.HSP_DTHRE AND DATEADD(HOUR,4,HSP.HSP_DTHRE) 
+        AND FLE.FLE_PAC_REG = HSP.HSP_PAC
+    LEFT JOIN RCL ON RCL.RCL_HSP = HSP.HSP_NUM 
+        AND RCL.RCL_PAC = PAC.PAC_REG 
+        AND RCL.RCL_COD = '00010022' 
+        AND RCL.RCL_STAT <> 'C' 
+        AND RCL.RCL_TXT LIKE '@%'
+    LEFT JOIN CNV ON CNV.CNV_COD = HSP.HSP_CNV 
+    WHERE 
+        FLE.FLE_DTHR_CHEGADA BETWEEN GETDATE() - 1 AND GETDATE() 
+        AND FLE.FLE_PAC_REG <> 0 
+        AND FLE.FLE_PSV_COD IN (900250,900197,900290,900289)
+        AND FLE.FLE_STATUS = 'A' -- Adicionado para filtrar apenas os aguardando
+    ORDER BY 
+        FLE.FLE_PAC_REG,
+        FLE.FLE_DTHR_CHEGADA
+";
+
+$resultado = $con->query($query);
+?>
+
+
+
+<div class="container">
+    <table>
         <tr>
-            <?php foreach ($row as $index => $cell): ?>
-                <td>
-                    <?php
-                    if ($index === 5) { // Status
-                        if ($cell === 'Ativo') {
-                            echo '<span class="status-bola ativo"></span>';
-                        } else {
-                            echo '<span class="status-bola inativo"></span>';
-                        }
-                    } elseif ($index === 12) { // BIP/Senha
-                        // Exibe a bolinha de status e o número
-                        echo '<span class="status-bola ' . strtolower($row[5]) . '"></span>'; // Ajusta para pegar a classe da situação
-                        echo htmlspecialchars($cell); // Exibe o número do BIP/Senha
-                    } else {
-                        echo htmlspecialchars($cell);
-                    }
-                    ?>
-                </td>
-            <?php endforeach; ?>
-            <td>Dr. José</td> <!-- Exemplo de responsável -->
-            <td>Sem anotações</td> <!-- Exemplo de anotações -->
-            <td>
-                <?php foreach ($procedimentos as $procedimento): ?>
-                    <span class="<?php echo $procedimento === 'TRIA' ? 'background-tria' : 'background-' . strtolower($procedimento); ?>">
-                        <?php echo htmlspecialchars($procedimento); ?>
-                    </span>
-                <?php endforeach; ?>
-            </td>
+            <th>FILA - CHEGADA</th>
+            <th>TEMPO ESPERA</th>
+            <th>FILA - ATD</th>
+            <th>FILA - CR</th>
+            <th>FILA - STATUS DE ATENDIMENTO CÓDIGO</th>
+            <th>FILA - STATUS DE ATENDIMENTO NOME</th>
+            <th>FILA CÓDIGO</th>
+            <th>FILA NOME</th>
+            <th>PACIENTE REGISTRO</th>
+            <th>PACIENTE NOME</th>
+            <th>CONSULTA CÓDIGO</th>
+            <th>CONSULTA DATA/HORA LANÇAMENTO</th>
+            <th>CONSULTA MÉDICO</th>
+            <th>CÓDIGO CONVENIO</th>
+            <th>NOME CONVÊNIO</th>
         </tr>
-    <?php endforeach; ?>
-</tbody>
-
+        <?php
+        if (count($resultado) > 0) {
+            foreach ($resultado as $row) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['FILA - CHEGADA'] instanceof DateTime ? $row['FILA - CHEGADA']->format('Y-m-d H:i:s') : $row['FILA - CHEGADA']) . "</td>
+                        <td>" . htmlspecialchars($row['TEMPO_ESPERA']) . "</td>
+                        <td>" . htmlspecialchars($row['FILA - ATD'] instanceof DateTime ? $row['FILA - ATD']->format('Y-m-d H:i:s') : $row['FILA - ATD']) . "</td>
+                        <td>" . htmlspecialchars($row['FILA - CR']) . "</td>
+                        <td class='sit-column'>" . htmlspecialchars($row['FILA - STATUS DE ATENDIMENTO CÓDIGO']) . "</td>
+                        <td>" . htmlspecialchars($row['FILA - STATUS DE ATENDIMENTO NOME']) . "</td>
+                        <td>" . htmlspecialchars($row['FILA CÓDIGO']) . "</td>
+                        <td>" . htmlspecialchars($row['FILA NOME']) . "</td>
+                        <td>" . htmlspecialchars($row['PACIENTE REGISTRO']) . "</td>
+                        <td>" . htmlspecialchars($row['PACIENTE NOME']) . "</td>
+                        <td>" . htmlspecialchars($row['CONSULTA CÓDIGO']) . "</td>
+                        <td>" . htmlspecialchars($row['CONSULTA DATA/HORA LANÇAMENTO'] instanceof DateTime ? $row['CONSULTA DATA/HORA LANÇAMENTO']->format('Y-m-d H:i:s') : $row['CONSULTA DATA/HORA LANÇAMENTO']) . "</td>
+                        <td>" . htmlspecialchars($row['CONSULTA MÉDICO']) . "</td>
+                        <td>" . htmlspecialchars($row['CÓDIGO CONVENIO']) . "</td>
+                        <td>" . htmlspecialchars($row['NOME CONVÊNIO']) . "</td>
+                    </tr>";
+            }
+        }
+        ?>
     </table>
 </div>
 
+    
 </body>
 </html>

@@ -1,61 +1,161 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
+    font-family: Arial, sans-serif; /* Define a fonte para Arial */
 }
+.navbar .container-fluid {
+    border-bottom: 5px solid green;
+    padding: 10px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+}
+
+.navbar .container-fluid .titulo {
+    color: #001f3f; 
+    font-size: 30px;
+    font-weight: bold;
+    flex-grow: 1; 
+    text-align: center; 
+    margin: 0; 
+}
+.container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+.container-fluid {
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.card-custom {
+    background-color: #28a745;
+    color: white;
+    height: auto;
+    min-height: 150px;
+    max-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: transform 0.3s ease; 
+    cursor: pointer; 
+}
+
+.card-custom:hover {
+    transform: scale(1.05); /* Aumenta o card em 5% ao passar o mouse */
+}
+
+.card-custom .card-body {
+    padding: 10px;
+    text-align: center; /* Centraliza o conteúdo do card */
+}
+
+.card-custom h5 {
+    color: white;
+    font-size: 1em;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center; /* Alinha verticalmente o ícone e o texto */
+    justify-content: center; /* Centraliza o ícone e o texto horizontalmente */
+}
+
+.card-custom .icon-background {
+    margin-right: 10px; /* Espaçamento entre o ícone e o título */
+}
+
+.card-custom .card-text-title {
+    color: white;
+    font-size: 0.9em;
+    margin-bottom: 7px;
+}
+
+.card-custom .number-large {
+    font-size: 2.4em;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.card-custom .number-large1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.card-custom .d-flex > div {
+    margin: 0;
+    text-align: center;
+}
+
+hr {
+    margin: 5px 0;
+}
+
+.text-small p,
+.text-small .card-title {
+    font-size: 1em;
+}
+
+.card-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.card-info div {
+    margin: 0 20px;
+    text-align: center;
+}
+
+.card-info p {
+    margin-top: 10px;
+}
+
+
 
 .table-container {
-    width: 100%;
-    margin: 0 auto;
-    overflow-x: auto;
+    max-width: 1000px; /* Limita a largura máxima da tabela */
+    margin: 0 auto; /* Centraliza a tabela */
+    width: 80%; /* Faz a tabela ocupar 80% da largura disponível */
 }
 
-.table {
-    width: 100%;
-    table-layout: auto;
-    border-collapse: collapse;
+table {
+    width: 100%; /* Faz a tabela ocupar toda a largura disponível dentro do contêiner */
+    border-collapse: collapse; /* Remove espaços entre as bordas das células */
 }
 
-.table th, .table td {
-    padding: 6px;
-    border: 1px solid #ddd;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: nowrap;
-    font-size: 10px; /* Tamanho da fonte reduzido */
+table th, table td {
+    border: 1px solid #ddd; /* Adiciona bordas para melhor visibilidade */
+    padding: 5px; /* Diminui o espaçamento interno das células */
+    white-space: normal; /* Permite que o texto quebre para a próxima linha */
+    font-size: 12px; /* Tamanho da fonte reduzido */
 }
 
-.table th {
-    background-color: rgba(54, 162, 235, 0.6);
-    color: white;
+table th {
+    background-color: rgba(54, 162, 235, 0.6); /* Cor de fundo dos cabeçalhos */
+    color: white; /* Cor do texto dos cabeçalhos */
+    padding: 8px; /* Espaçamento do cabeçalho */
+    text-align: left; /* Alinha o texto à esquerda */
 }
 
-.cabe {
-    text-align: left;
+table td.sit-column {
+    text-align: center; /* Alinha o texto ao centro para a coluna de situação */
+    vertical-align: middle; /* Alinha verticalmente ao centro */
 }
 
-
-.table td {
-    text-transform: uppercase;
+/* Definindo largura máxima para colunas específicas */
+table td:nth-child(1),
+table td:nth-child(3),
+table td:nth-child(12) {
+    max-width: 120px; /* Largura máxima para as colunas de data */
 }
 
-.status-bola {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 2px;
+table td:nth-child(2),
+table td:nth-child(5),
+table td:nth-child(14) {
+    max-width: 80px; /* Largura máxima para as colunas de status */
 }
 
-.ativo {
-    background-color: green;
-}
-
-.esperando {
-    background-color: blue;
-}
-
-.off {
-    background-color: yellow;
+table td:nth-child(6),
+table td:nth-child(13) {
+    max-width: 100px; /* Largura máxima para as colunas de nome e médico */
 }

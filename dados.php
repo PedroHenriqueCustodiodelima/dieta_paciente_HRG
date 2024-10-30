@@ -15,6 +15,7 @@
 include 'conexao.php'; 
 include 'header.php';
 
+$con = new Conexao();
 
 function capitalizeFirstLetters($string) {
     return ucwords(strtolower($string));
@@ -79,7 +80,7 @@ try {
     ";
 
     if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
+        $query .= " AND HSP.HSP_DTHRE >= DATEADD(HOUR, -?, GETDATE())"; 
     }
 
     $query .= "
@@ -118,12 +119,13 @@ try {
     ";
 
     if ($hoursFilter > 0) {
-        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -$hoursFilter, GETDATE())"; 
+        $query .= " AND HSP.HSP_DTHRA >= DATEADD(HOUR, -?, GETDATE())"; 
     }
 
     $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
-    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    $params = [$hoursFilter]; // Parâmetros para Prepared Statement
+    $result = $con->query($query, $params); // Passando parâmetros
 
     $groupedPatients = [];
 
@@ -140,6 +142,7 @@ try {
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
+
             if (!isset($groupedPatients[$registro])) {
                 $totalPacientes++;
                 
@@ -185,7 +188,8 @@ try {
         }
         $groupedPatients = array_values($groupedPatients);
     }
-        $queryLeitos = "
+    
+    $queryLeitos = "
         SELECT 
             LOC.LOC_NOME AS 'LEITO',
             COUNT(HSP.HSP_NUM) AS 'QUANTIDADE_PACIENTES'
@@ -199,22 +203,24 @@ try {
             LOC.LOC_NOME
         ORDER BY
             LOC.LOC_NOME;
-        ";
+    ";
 
-        $resultLeitos = $connection->query($queryLeitos)->fetchAll(PDO::FETCH_ASSOC);
-        $leitos = [];
-        $quantidadePacientes = [];
+    $resultLeitos = $con->query($queryLeitos); // Usando a instância correta
+    $leitos = [];
+    $quantidadePacientes = [];
 
-        if (count($resultLeitos) > 0) {
+    if (count($resultLeitos) > 0) {
         foreach ($resultLeitos as $row) {
             $leitos[] = $row['LEITO'];
             $quantidadePacientes[] = $row['QUANTIDADE_PACIENTES'];
         }
-        }
-        
+    }
+
+    $totalLeitos = count($leitos);
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
+
 ?>
 
 <a href="index.php" class="custom-link">

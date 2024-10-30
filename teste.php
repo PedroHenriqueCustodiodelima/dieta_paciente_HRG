@@ -178,32 +178,7 @@ include 'header.php';
         </div>
 
         <!-- Tabela Única -->
-        <div id="dataTable" class="table-container mt-4" style="display: none;">
-            <table class="table table-striped">
-                <thead>
-                    <tr class="cabe">
-                        <th>Chegada</th>
-                        <th>Marc</th>
-                        <th>Tmp</th>
-                        <th>Atd.</th>
-                        <th>Tmp</th>
-                        <th>Sit</th>
-                        <th>Nome</th>
-                        <th>Conv</th>
-                        <th>Pront</th>
-                        <th>SX</th>
-                        <th>ID</th>
-                        <th>Observação</th>
-                        <th>BIP/Senha</th>
-                        <th>Procedimento</th>
-                        <th>Responsável</th>
-                        <th>Anotações</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                </tbody>
-            </table>
-        </div>
+
     </div>
 </div>
 
