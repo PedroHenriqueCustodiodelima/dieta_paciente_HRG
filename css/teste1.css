@@ -6,47 +6,56 @@ body {
 }
 
 .table-container {
-    width: 100%; /* Aumenta a largura da tabela para 100% */
-    margin: 0 auto; /* Centraliza a tabela */
-    overflow-x: auto; /* Permite rolagem horizontal se necessário */
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: auto;
 }
 
 .table {
-    width: 100%; /* Faz a tabela ocupar toda a largura disponível */
-    table-layout: auto; /* Permite que as colunas se ajustem ao conteúdo */
-    border-collapse: collapse; /* Remove espaços entre as bordas das células */
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
 }
 
 .table th, .table td {
-    padding: 6px; /* Diminui ainda mais o espaçamento interno das células */
-    border: 1px solid #ddd; /* Adiciona bordas para melhor visibilidade */
-    overflow: visible; /* Permite que o conteúdo que excede a largura da célula seja visível */
-    text-overflow: clip; /* Remove a adição de '...' se o conteúdo for muito longo */
-    white-space: nowrap; /* Impede que o texto quebre para a próxima linha */
-    font-size: 12px; /* Diminui ainda mais o tamanho da fonte */
+    padding: 6px;
+    border: 1px solid #ddd;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+    font-size: 10px; /* Tamanho da fonte reduzido */
 }
 
 .table th {
-    background-color: rgba(54, 162, 235, 0.6); /* Cor de fundo dos cabeçalhos */
-    color: white; /* Cor do texto dos cabeçalhos */
+    background-color: rgba(54, 162, 235, 0.6);
+    color: white;
 }
 
 .cabe {
-    text-align: left; /* Alinha o texto à esquerda */
+    text-align: left;
 }
 
-/* Estilos para as bolinhas de status */
+
+.table td {
+    text-transform: uppercase;
+}
+
 .status-bola {
     display: inline-block;
-    width: 8px; /* Tamanho da bolinha */
-    height: 8px; /* Tamanho da bolinha */
-    border-radius: 50%; /* Faz a bolinha ser redonda */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 2px;
 }
 
 .ativo {
-    background-color: green; /* Cor verde para ativo */
+    background-color: green;
 }
 
-.inativo {
-    background-color: red; /* Cor vermelha para inativo */
+.esperando {
+    background-color: blue;
+}
+
+.off {
+    background-color: yellow;
 }

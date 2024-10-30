@@ -340,28 +340,31 @@ ksort($prescricaoCounts);
 
 <?php if (!empty($leitoCounts) || !empty($convênioCounts) || !empty($unidadeCounts) || !empty($prescricaoCounts)): ?>
     <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h4>Gráficos de Pacientes</h4>
+    <h4></h4>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-4"> 
-                        <canvas id="barChart" style="width: 100%; height: 300px;"></canvas>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <canvas id="lineChart" style="width: 100%; height: 300px;"></canvas>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <canvas id="unitBarChart" style="width: 100%; height: 300px;"></canvas>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <canvas id="prescriptionChart" style="width: 100%; height: 300px;"></canvas>
-                    </div>
-                </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <canvas id="unitBarChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <canvas id="prescriptionChart"></canvas>
             </div>
         </div>
     </div>
+</div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', (event) => {
@@ -485,6 +488,7 @@ ksort($prescricaoCounts);
         <h2>Não há dados suficientes para exibir gráficos.</h2>
     </div>
 <?php endif; ?>
+
 
 
 <script>
