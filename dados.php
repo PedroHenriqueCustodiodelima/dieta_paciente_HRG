@@ -24,6 +24,8 @@ $totalPacientes = 0;
 $pacientesAlta = 0;
 $pacientesAdmissao = 0;
 
+$connection = new Conexao(); // Criação da conexão
+
 try {
     $hoursFilter = 12; 
 
@@ -123,7 +125,7 @@ try {
 
     $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
-    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    $result = $connection->query($query); // Usando a nova classe de conexão
 
     $groupedPatients = [];
 
@@ -135,8 +137,14 @@ try {
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
             $unidade = capitalizeFirstLetters($row['UNIDADE']);
-            $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
+            
+            // Verificação e formatação da prescrição
+            $prescricao = !empty($row['PRESCRICAO']) ? 
+                ($row['PRESCRICAO'] instanceof DateTime ? $row['PRESCRICAO']->format('d/m/Y') : date('d/m/Y', strtotime($row['PRESCRICAO']))) : '';
+            
+            // Verificação e formatação da data de admissão
+            $admissao = $row['DATA_EVENTO'] instanceof DateTime ? $row['DATA_EVENTO']->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
+
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
@@ -185,7 +193,8 @@ try {
         }
         $groupedPatients = array_values($groupedPatients);
     }
-        $queryLeitos = "
+
+    $queryLeitos = "
         SELECT 
             LOC.LOC_NOME AS 'LEITO',
             COUNT(HSP.HSP_NUM) AS 'QUANTIDADE_PACIENTES'
@@ -199,23 +208,18 @@ try {
             LOC.LOC_NOME
         ORDER BY
             LOC.LOC_NOME;
-        ";
+    ";
 
-        $resultLeitos = $connection->query($queryLeitos)->fetchAll(PDO::FETCH_ASSOC);
-        $leitos = [];
-        $quantidadePacientes = [];
+    $resultLeitos = $connection->query($queryLeitos);
 
-        if (count($resultLeitos) > 0) {
-        foreach ($resultLeitos as $row) {
-            $leitos[] = $row['LEITO'];
-            $quantidadePacientes[] = $row['QUANTIDADE_PACIENTES'];
-        }
-        }
-        
+    // Código para exibir resultados...
+
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
+
 
 <a href="index.php" class="custom-link">
     <i class="fa-solid fa-circle-left" style="font-size: 20px; margin-right: 8px;"></i>

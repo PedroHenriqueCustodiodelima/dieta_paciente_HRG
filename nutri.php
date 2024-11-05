@@ -19,6 +19,7 @@ function capitalizeFirstLetters($string) {
 }
 
 try {
+    $connection = new Conexao(); // Cria uma instância da classe Conexao
     $hoursFilter = 24; 
 
     if (isset($_POST['filter'])) {
@@ -56,7 +57,7 @@ try {
         LOC.LOC_NOME AS 'LEITO',
         ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
         ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-		PSC.PSC_OBS AS 'OBS' ,
+        PSC.PSC_OBS AS 'OBS',
         DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
     FROM
         HSP
@@ -96,7 +97,7 @@ try {
             LOC.LOC_NOME AS 'LEITO',
             ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-			PSC.PSC_OBS AS 'OBS' ,
+            PSC.PSC_OBS AS 'OBS',
             DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
         FROM
             HSP
@@ -117,7 +118,8 @@ try {
 
     $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
-    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    // Use a instância da classe Conexao para fazer a consulta
+    $result = $connection->query($query); 
     
     // Inicializa a variável como um array vazio
     $groupedPatients = []; 
@@ -130,8 +132,13 @@ try {
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
             $unidade = capitalizeFirstLetters($row['UNIDADE']);
-            $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
+            $prescricao = !empty($row['PRESCRICAO']) ? 
+            (is_string($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : $row['PRESCRICAO']->format('d/m/Y')) 
+            : '';
+            $admissao = !empty($row['DATA_EVENTO']) ? 
+            (is_string($row['DATA_EVENTO']) ? date('d/m/Y H:i', strtotime($row['DATA_EVENTO'])) : $row['DATA_EVENTO']->format('d/m/Y H:i')) 
+            : '';
+        
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
@@ -183,12 +190,13 @@ try {
 
 if (!empty($groupedPatients)) {
     foreach ($groupedPatients as $patient) {
-        
+        // Aqui você pode exibir as informações do paciente
     }
 } else {
     echo "Nenhum paciente encontrado.";
 }
 ?>
+
 
 <a href="index.php" class="custom-link">
     <i class="fa-solid fa-circle-left" style="font-size: 20px; margin-right: 8px;"></i>

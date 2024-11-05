@@ -21,8 +21,8 @@ include 'header.php';
 function capitalizeFirstLetters($string) {
     return ucwords(strtolower($string));
 }
-
 try {
+    $conexao = new Conexao(); // Inicializando a conexão
     $hoursFilter = 6; 
 
     if (isset($_POST['filter'])) {
@@ -43,37 +43,37 @@ try {
     }
 
     $query = "
-      SELECT 
-        'ADMISSAO' AS TIPO,
-        HSP.HSP_NUM AS 'IH',
-        HSP.HSP_DTHRE AS 'DATA_EVENTO',
-        HSP.HSP_PAC AS 'REGISTRO',
-        PAC.PAC_NOME AS 'PACIENTE',
-        CASE
-            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
-                THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
-            WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
-                THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
-        END AS 'IDADE',
-        CNV.CNV_NOME AS 'CONVENIO',
-        RTRIM(STR.STR_NOME) AS 'UNIDADE',
-        LOC.LOC_NOME AS 'LEITO',
-        ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
-        ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-		PSC.PSC_OBS AS 'OBS' ,
-        DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
-    FROM
-        HSP
-    INNER JOIN LOC ON HSP_LOC = LOC_COD
-    INNER JOIN STR ON STR_COD = LOC_STR
-    INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
-    INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
-    LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
-    LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
-    WHERE
-        HSP_TRAT_INT = 'I'
-        AND HSP_STAT = 'A'
-        AND PSC.PSC_STAT <> 'S'
+        SELECT 
+            'ADMISSAO' AS TIPO,
+            HSP.HSP_NUM AS 'IH',
+            HSP.HSP_DTHRE AS 'DATA_EVENTO',
+            HSP.HSP_PAC AS 'REGISTRO',
+            PAC.PAC_NOME AS 'PACIENTE',
+            CASE
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) < 1 
+                    THEN CAST(DATEDIFF(DAY, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Dia(s).'
+                WHEN DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) >= 1 
+                    THEN CAST(DATEDIFF(YEAR, PAC.PAC_NASC, GETDATE()) AS VARCHAR(50)) + ' Ano(s).'
+            END AS 'IDADE',
+            CNV.CNV_NOME AS 'CONVENIO',
+            RTRIM(STR.STR_NOME) AS 'UNIDADE',
+            LOC.LOC_NOME AS 'LEITO',
+            ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
+            ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
+            PSC.PSC_OBS AS 'OBS' ,
+            DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
+        FROM
+            HSP
+        INNER JOIN LOC ON HSP_LOC = LOC_COD
+        INNER JOIN STR ON STR_COD = LOC_STR
+        INNER JOIN PAC ON PAC.PAC_REG = HSP.HSP_PAC
+        INNER JOIN CNV ON CNV_COD = HSP.HSP_CNV
+        LEFT JOIN PSC ON PSC.PSC_HSP = HSP.HSP_NUM AND PSC.PSC_PAC = HSP.HSP_PAC AND PSC.PSC_TIP = 'D'
+        LEFT JOIN ADP ON ADP.ADP_COD = PSC.PSC_ADP AND ADP_TIPO = 'D'
+        WHERE
+            HSP_TRAT_INT = 'I'
+            AND HSP_STAT = 'A'
+            AND PSC.PSC_STAT <> 'S'
     ";
 
     if ($hoursFilter > 0) {
@@ -100,7 +100,7 @@ try {
             LOC.LOC_NOME AS 'LEITO',
             ISNULL(PSC.PSC_DHINI, '') AS 'PRESCRICAO',
             ISNULL(ADP.ADP_NOME, '') AS 'DIETA',
-			PSC.PSC_OBS AS 'OBS' ,
+            PSC.PSC_OBS AS 'OBS' ,
             DATEDIFF(HOUR, HSP.HSP_DTHRE, GETDATE()) AS 'HORAS'
         FROM
             HSP
@@ -121,9 +121,8 @@ try {
 
     $query .= " ORDER BY DATA_EVENTO DESC;"; 
 
-    $result = $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    $result = $conexao->query($query);
 
-    
     $groupedPatients = [];
 
     if (count($result) > 0) {
@@ -134,13 +133,15 @@ try {
             $convenio = capitalizeFirstLetters($row['CONVENIO']);
             $leito = capitalizeFirstLetters($row['LEITO']);
             $unidade = capitalizeFirstLetters($row['UNIDADE']);
-            $prescricao = !empty($row['PRESCRICAO']) ? date('d/m/Y', strtotime($row['PRESCRICAO'])) : '';
-            $admissao = date('d/m/Y H:i', strtotime($row['DATA_EVENTO']));
+            $prescricao = !empty($row['PRESCRICAO']) 
+            ? ($row['PRESCRICAO'] instanceof DateTime ? $row['PRESCRICAO']->format('d/m/Y') : date('d/m/Y', strtotime($row['PRESCRICAO']))) 
+            : '';
+        
+            $admissao = !empty($row['DATA_EVENTO']) ? $row['DATA_EVENTO']->format('d/m/Y H:i') : '';
             $idade = $row['IDADE'];
             $tipo = $row['TIPO'];
             $registro = $row['REGISTRO']; 
         
-            
             if (!isset($groupedPatients[$registro])) {
                 $groupedPatients[$registro] = [
                     'REGISTRO' => $registro,
@@ -156,22 +157,18 @@ try {
                     'TIPO' => $tipo
                 ];
             } else {
-                
                 if ($previousStates[$registro] === 'ADMISSAO' && $tipo === 'ALTA') {
                     echo "<script>showNotification('$patientName');</script>";
                 }
             }
             $previousStates[$registro] = $tipo;
-        
-           
+
             if (!empty($row['DIETA'])) {
                 $dietName = capitalizeFirstLetters($row['DIETA']);
                 if (!in_array($dietName, $groupedPatients[$registro]['DIETAS'])) {
                     $groupedPatients[$registro]['DIETAS'][] = $dietName;
                 }
             }
-            
-            
             if (!empty($row['OBS'])) {
                 $obsText = capitalizeFirstLetters($row['OBS']);
                 if (!in_array($obsText, $groupedPatients[$registro]['OBS'])) {
@@ -179,16 +176,14 @@ try {
                 }
             }
         }
-        
-        
         $groupedPatients = array_values($groupedPatients);
-        
     }
 
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
 ?>
+
 <a href="index.php" class="custom-link">
     <i class="fa-solid fa-circle-left" style="font-size: 20px; margin-right: 8px;"></i>
     <span>Voltar</span>
